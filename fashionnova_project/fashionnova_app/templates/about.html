@@ -1,0 +1,552 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us - FashionNova{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="about-hero py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Welcome to FashionNova</h1>
+                <p class="lead mb-4">
+                    Where fashion meets innovation. We're your premier destination for 
+                    the latest trends, premium quality, and exceptional style.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'products' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-shopping-bag me-2"></i>Shop Now
+                    </a>
+                    <a href="#contact" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-envelope me-2"></i>Contact Us
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 mt-4 mt-lg-0">
+                <img src="{% static 'images/about/fashion-store.jpg' %}" 
+                     alt="FashionNova Store"
+                     class="img-fluid rounded shadow"
+                     onerror="this.src='https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Story -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="section-title mb-4">Our Story</h2>
+                <p class="text-muted lead mb-5">
+                    Founded in 2020, FashionNova started with a simple mission: to make 
+                    high-fashion accessible to everyone. What began as a small boutique 
+                    has grown into a leading online fashion destination.
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="story-card text-center p-4">
+                    <div class="story-icon mb-3">
+                        <i class="fas fa-bullseye fa-3x text-primary"></i>
+                    </div>
+                    <h4>Our Mission</h4>
+                    <p class="text-muted">
+                        To provide fashionable, high-quality clothing at affordable prices 
+                        while delivering exceptional customer experiences.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="story-card text-center p-4">
+                    <div class="story-icon mb-3">
+                        <i class="fas fa-eye fa-3x text-primary"></i>
+                    </div>
+                    <h4>Our Vision</h4>
+                    <p class="text-muted">
+                        To become Africa's most trusted fashion platform, inspiring 
+                        confidence through style and innovation.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="story-card text-center p-4">
+                    <div class="story-icon mb-3">
+                        <i class="fas fa-handshake fa-3x text-primary"></i>
+                    </div>
+                    <h4>Our Values</h4>
+                    <p class="text-muted">
+                        Quality, authenticity, inclusivity, and sustainability drive 
+                        everything we do.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="section-title mb-4">Why Choose FashionNova?</h2>
+                <p class="text-muted">We go above and beyond for our customers</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-award fa-2x text-primary"></i>
+                    </div>
+                    <h5>Quality Guarantee</h5>
+                    <p class="text-muted small">
+                        Premium materials and craftsmanship in every product
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-truck fa-2x text-primary"></i>
+                    </div>
+                    <h5>Fast Delivery</h5>
+                    <p class="text-muted small">
+                        Free shipping on orders over Ksh 5,000. Nationwide delivery.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-undo fa-2x text-primary"></i>
+                    </div>
+                    <h5>Easy Returns</h5>
+                    <p class="text-muted small">
+                        30-day return policy. No questions asked.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-headset fa-2x text-primary"></i>
+                    </div>
+                    <h5>24/7 Support</h5>
+                    <p class="text-muted small">
+                        Customer service available round the clock
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Team -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="section-title mb-4">Meet Our Team</h2>
+                <p class="text-muted">The passionate people behind FashionNova</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card text-center">
+                    <div class="team-img mb-3">
+                        <img src="{% static 'fashionnova_app/images/Sarah.jpg' %}" 
+                             alt="CEO" 
+                             class="rounded-circle img-fluid"
+                             width="150" height="150">
+                    </div>
+                    <h5>Sarah Johnson</h5>
+                    <p class="text-muted small">CEO & Founder</p>
+                    <div class="social-links">
+                        <a href="#" class="text-muted me-2"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-muted me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card text-center">
+                    <div class="team-img mb-3">
+                        <img src="{% static 'fashionnova_app/images/David.jpg' %}" 
+                             alt="Head of Design" 
+                             class="rounded-circle img-fluid"
+                             width="150" height="150">
+                    </div>
+                    <h5>David Huan</h5>
+                    <p class="text-muted small">Head of Design</p>
+                    <div class="social-links">
+                        <a href="#" class="text-muted me-2"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-muted me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-behance"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card text-center">
+                    <div class="team-img mb-3">
+                        <img src="{% static 'fashionnova_app/images/Grace.jpg' %}"
+                             alt="Marketing Director" 
+                             class="rounded-circle img-fluid"
+                             width="150" height="150">
+                    </div>
+                    <h5>Grace Mwangi</h5>
+                    <p class="text-muted small">Marketing Director</p>
+                    <div class="social-links">
+                        <a href="#" class="text-muted me-2"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-muted me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card text-center">
+                    <div class="team-img mb-3">
+                        <img src="{% static 'fashionnova_app/images/Ian2.jpeg' %}" 
+                             alt="Operations Manager" 
+                             class="rounded-circle img-fluid"
+                             width="150" height="150">
+                    </div>
+                    <h5>Ian Gathua</h5>
+                    <p class="text-muted small">Operations Manager</p>
+                    <div class="social-links">
+                        <a href="#" class="text-muted me-2"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-muted me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-facebook"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="stat-card">
+                    <h2 class="display-4 fw-bold">10K+</h2>
+                    <p class="mb-0">Happy Customers</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="stat-card">
+                    <h2 class="display-4 fw-bold">5K+</h2>
+                    <p class="mb-0">Products Available</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="stat-card">
+                    <h2 class="display-4 fw-bold">50+</h2>
+                    <p class="mb-0">Top Brands</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="stat-card">
+                    <h2 class="display-4 fw-bold">24/7</h2>
+                    <p class="mb-0">Customer Support</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sustainability -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" 
+                     alt="Sustainable Fashion"
+                     class="img-fluid rounded shadow">
+            </div>
+            <div class="col-lg-6 mt-4 mt-lg-0">
+                <h2 class="mb-4">Our Commitment to Sustainability</h2>
+                <p class="text-muted mb-4">
+                    At FashionNova, we believe in fashion that's not only beautiful but 
+                    also responsible. We're committed to sustainable practices that 
+                    protect our planet.
+                </p>
+                <ul class="list-unstyled">
+                    <li class="mb-3">
+                        <i class="fas fa-leaf text-success me-2"></i>
+                        Eco-friendly packaging materials
+                    </li>
+                    <li class="mb-3">
+                        <i class="fas fa-recycle text-success me-2"></i>
+                        Recycling program for old clothes
+                    </li>
+                    <li class="mb-3">
+                        <i class="fas fa-tint text-success me-2"></i>
+                        Water-saving production methods
+                    </li>
+                    <li class="mb-3">
+                        <i class="fas fa-sun text-success me-2"></i>
+                        Renewable energy in our warehouses
+                    </li>
+                    <li>
+                        <i class="fas fa-hand-holding-heart text-success me-2"></i>
+                        Support for local artisans and communities
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="section-title mb-4">Get In Touch</h2>
+                <p class="text-muted">We'd love to hear from you</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <div class="contact-info">
+                    <div class="info-item mb-4">
+                        <div class="info-icon mb-2">
+                            <i class="fas fa-map-marker-alt fa-2x text-primary"></i>
+                        </div>
+                        <h5>Visit Us</h5>
+                        <p class="text-muted mb-0">
+                            FashionNova Plaza<br>
+                            123 Fashion Street<br>
+                            Nairobi, Kenya
+                        </p>
+                    </div>
+                    
+                    <div class="info-item mb-4">
+                        <div class="info-icon mb-2">
+                            <i class="fas fa-phone fa-2x text-primary"></i>
+                        </div>
+                        <h5>Call Us</h5>
+                        <p class="text-muted mb-0">
+                            +254 700 000 000<br>
+                            Mon-Fri: 8AM - 6PM
+                        </p>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon mb-2">
+                            <i class="fas fa-envelope fa-2x text-primary"></i>
+                        </div>
+                        <h5>Email Us</h5>
+                        <p class="text-muted mb-0">
+                            info@fashionnova.com<br>
+                            support@fashionnova.com
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <h4 class="mb-4">Send Us a Message</h4>
+                        <form id="contact-form">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">Full Name *</label>
+                                    <input type="text" class="form-control" id="name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email Address *</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="subject" class="form-label">Subject</label>
+                                <input type="text" class="form-control" id="subject">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message *</label>
+                                <textarea class="form-control" id="message" rows="5" required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .section-title {
+        position: relative;
+        padding-bottom: 15px;
+    }
+    
+    .section-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(to right, #ff6b6b, #ff8e8e);
+    }
+    
+    .about-hero {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .story-card, .feature-card, .team-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        background: white;
+    }
+    
+    .story-card:hover, .feature-card:hover, .team-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .story-icon, .feature-icon, .info-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        background: rgba(255, 107, 107, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .team-img img {
+        border: 5px solid white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .social-links a {
+        transition: color 0.3s;
+    }
+    
+    .social-links a:hover {
+        color: #ff6b6b !important;
+    }
+    
+    .stat-card {
+        padding: 20px;
+    }
+    
+    .contact-info .info-item {
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-outline-primary {
+        color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Contact form submission
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value
+            };
+            
+            // Show loading state
+            const submitBtn = contactForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+            submitBtn.disabled = true;
+            
+            // Simulate API call (replace with actual API call)
+            setTimeout(() => {
+                // Show success message
+                alert('Thank you for your message! We will get back to you soon.');
+                
+                // Reset form
+                contactForm.reset();
+                
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 1500);
+        });
+    }
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href !== '#') {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

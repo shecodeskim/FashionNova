@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Checkout - FashionNova{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Shipping Information</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="checkout-form">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    
+                    <div class="mt-4">
+                        <h5>Payment Method</h5>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="payment_method" 
+                                   id="mpesa" value="mpesa" checked>
+                            <label class="form-check-label" for="mpesa">
+                                <i class="fas fa-mobile-alt"></i> M-Pesa
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="payment_method" 
+                                   id="card" value="card">
+                            <label class="form-check-label" for="card">
+                                <i class="fas fa-credit-card"></i> Credit/Debit Card
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_method" 
+                                   id="cod" value="cod">
+                            <label class="form-check-label" for="cod">
+                                <i class="fas fa-money-bill-wave"></i> Cash on Delivery
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+                        Place Order
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="order-items mb-3">
+                    {% for item in cart_items %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <div>
+                            <small>{{ item.product.name }} x {{ item.quantity }}</small>
+                        </div>
+                        <div>
+                            <small>Ksh {{ item.get_total_price }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal</span>
+                    <span>Ksh {{ subtotal }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Shipping Fee</span>
+                    <span>Ksh {{ shipping_fee }}</span>
+                </div>
+                {% if discount > 0 %}
+                <div class="d-flex justify-content-between mb-2 text-success">
+                    <span>Discount</span>
+                    <span>-Ksh {{ discount }}</span>
+                </div>
+                {% endif %}
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <strong>Total Amount</strong>
+                    <strong class="h5">Ksh {{ total }}</strong>
+                </div>
+                
+                <div class="alert alert-info small">
+                    <i class="fas fa-info-circle"></i>
+                    For M-Pesa payments, you will receive a prompt on your phone to enter your PIN.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Login - FashionNova{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="text-center mb-0">
+                        <i class="fas fa-sign-in-alt me-2"></i>Welcome Back to FashionNova
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="text-center mb-4">
+                            <i class="fas fa-crown fa-3x text-primary mb-3"></i>
+                            <h4>Sign in to your account</h4>
+                            <p class="text-muted">Enter your credentials to continue shopping</p>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.username|as_crispy_field }}
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            {{ form.password|as_crispy_field }}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember">
+                                <label class="form-check-label" for="remember">
+                                    Remember me
+                                </label>
+                            </div>
+                            <a href="#" class="text-primary text-decoration-none">
+                                Forgot Password?
+                            </a>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </button>
+                        </div>
+                        
+                        <div class="text-center mb-4">
+                            <span class="text-muted">Or continue with</span>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mb-4">
+                            <button type="button" class="btn btn-outline-primary">
+                                <i class="fab fa-google me-2"></i>Google
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-2">Don't have an account?</p>
+                        <a href="{% url 'register' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>Create New Account
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Login as demo user info -->
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Demo Accounts</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="p-2">
+                                <small class="text-muted d-block">Customer Account</small>
+                                <code>username: demo_customer</code><br>
+                                <code>password: demo123</code>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2">
+                                <small class="text-muted d-block">Seller Account</small>
+                                <code>username: demo_seller</code><br>
+                                <code>password: demo123</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .form-control:focus {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-outline-primary {
+        color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Focus on username field
+        document.getElementById('id_username').focus();
+        
+        // Demo login buttons
+        const form = document.querySelector('form');
+        const usernameInput = document.getElementById('id_username');
+        const passwordInput = document.getElementById('id_password');
+        
+        // Demo customer button
+        document.querySelector('.demo-customer')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            usernameInput.value = 'demo_customer';
+            passwordInput.value = 'demo123';
+            form.submit();
+        });
+        
+        // Demo seller button
+        document.querySelector('.demo-seller')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            usernameInput.value = 'demo_seller';
+            passwordInput.value = 'demo123';
+            form.submit();
+        });
+    });
+</script>
+{% endblock %}

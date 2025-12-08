@@ -1,0 +1,577 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Brands - FashionNova{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item active">Brands</li>
+                </ol>
+            </nav>
+            <h1 class="mb-3">Shop by Brand</h1>
+            <p class="text-muted">Discover fashion from your favorite brands</p>
+        </div>
+    </div>
+    
+    <!-- Filter and Sort Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'brands' %}" 
+                   class="btn btn-outline-secondary {% if not request.GET.rating %}active{% endif %}">
+                    All Brands
+                </a>
+                <a href="{% url 'brands' %}?rating=4" 
+                   class="btn btn-outline-secondary {% if request.GET.rating == '4' %}active{% endif %}">
+                    ⭐ 4+ Rating
+                </a>
+                <a href="{% url 'brands' %}?rating=3" 
+                   class="btn btn-outline-secondary {% if request.GET.rating == '3' %}active{% endif %}">
+                    ⭐ 3+ Rating
+                </a>
+                <a href="{% url 'brands' %}?sort=rating" 
+                   class="btn btn-outline-secondary {% if request.GET.sort == 'rating' %}active{% endif %}">
+                    Top Rated
+                </a>
+                <a href="{% url 'brands' %}?sort=products" 
+                   class="btn btn-outline-secondary {% if request.GET.sort == 'products' %}active{% endif %}">
+                    Most Products
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" class="form-control" 
+                       placeholder="Search brands..." id="brand-search">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Featured Brands -->
+    {% if featured_brands %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">Featured Brands</h2>
+            <div class="row">
+                {% for brand in featured_brands %}
+                <div class="col-md-2 col-sm-4 col-6 mb-4">
+                    <div class="featured-brand text-center">
+                        <a href="{% url 'brand_detail' brand.slug %}" class="text-decoration-none">
+                            <div class="brand-logo-wrapper mb-3">
+                                {% if brand.logo %}
+                                <img src="{{ brand.logo.url }}" 
+                                     alt="{{ brand.name }}"
+                                     class="brand-logo img-fluid"
+                                     onerror="this.src='{% static 'images/brands/default-brand.png' %}'">
+                                {% else %}
+                                <div class="default-brand-logo">
+                                    <i class="fas fa-crown fa-2x"></i>
+                                </div>
+                                {% endif %}
+                                {% if brand.average_rating >= 4.5 %}
+                                <span class="featured-badge">
+                                    <i class="fas fa-star"></i> Top Rated
+                                </span>
+                                {% endif %}
+                            </div>
+                            <h6 class="brand-name">{{ brand.name }}</h6>
+                            <div class="brand-rating small">
+                                {% with rating=brand.average_rating %}
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <div class="star-rating me-1">
+                                        {% for i in "12345" %}
+                                        <i class="fas fa-star{% if forloop.counter <= rating|add:"0" %}{% else %}-o{% endif %} 
+                                           {% if forloop.counter <= rating|add:"0" %}text-warning{% else %}text-muted{% endif %}">
+                                        </i>
+                                        {% endfor %}
+                                    </div>
+                                    <span class="text-muted">({{ rating|floatformat:1 }})</span>
+                                </div>
+                                {% endwith %}
+                            </div>
+                            <small class="text-muted">{{ brand.product_count }} products</small>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- All Brands -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">All Brands ({{ total_brands }})</h2>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
+                            data-bs-toggle="dropdown">
+                        Sort by: 
+                        {% if sort_by == 'rating' %}Rating
+                        {% elif sort_by == 'products' %}Products
+                        {% else %}Name{% endif %}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item {% if sort_by == 'name' or not sort_by %}active{% endif %}" 
+                               href="{% url 'brands' %}?sort=name">
+                                Name A-Z
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item {% if sort_by == 'rating' %}active{% endif %}" 
+                               href="{% url 'brands' %}?sort=rating">
+                                Highest Rated
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item {% if sort_by == 'products' %}active{% endif %}" 
+                               href="{% url 'brands' %}?sort=products">
+                                Most Products
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Alphabetical Navigation -->
+            <div class="alphabet-nav mb-4">
+                <div class="d-flex flex-wrap gap-1">
+                    {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                    <a href="#letter-{{ letter }}" class="btn btn-sm btn-outline-secondary">
+                        {{ letter }}
+                    </a>
+                    {% endfor %}
+                    <a href="#letter-other" class="btn btn-sm btn-outline-secondary">
+                        #
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Brands by Alphabet -->
+            <div class="brands-alphabetical">
+                {% for letter, letter_brands in alphabetical_brands.items %}
+                <div class="letter-section mb-5" id="letter-{{ letter }}">
+                    <h3 class="letter-heading mb-4">{{ letter }}</h3>
+                    <div class="row">
+                        {% for brand in letter_brands %}
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                            <div class="brand-card card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="flex-shrink-0 me-3">
+                                            {% if brand.logo %}
+                                            <img src="{{ brand.logo.url }}" 
+                                                 alt="{{ brand.name }}"
+                                                 class="brand-logo-small"
+                                                 onerror="this.src='{% static 'images/brands/default-brand.png' %}'">
+                                            {% else %}
+                                            <div class="default-brand-logo-small">
+                                                <i class="fas fa-tag"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h5 class="card-title mb-1">
+                                                <a href="{% url 'brand_detail' brand.slug %}" 
+                                                   class="text-decoration-none text-dark">
+                                                    {{ brand.name }}
+                                                </a>
+                                            </h5>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="star-rating small me-2">
+                                                    {% with rating=brand.average_rating %}
+                                                    {% for i in "12345" %}
+                                                    <i class="fas fa-star{% if forloop.counter <= rating|add:"0" %}{% else %}-o{% endif %} 
+                                                       {% if forloop.counter <= rating|add:"0" %}text-warning{% else %}text-muted{% endif %}"
+                                                       style="font-size: 0.8rem;">
+                                                    </i>
+                                                    {% endfor %}
+                                                    {% endwith %}
+                                                </div>
+                                                <small class="text-muted">{{ brand.average_rating|floatformat:1 }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="card-text text-muted small mb-3">
+                                        {{ brand.description|truncatechars:100|default:"Premium fashion brand" }}
+                                    </p>
+                                    
+                                    <div class="brand-stats">
+                                        <div class="row text-center">
+                                            <div class="col-6 border-end">
+                                                <div class="stat-number text-primary">{{ brand.product_count }}</div>
+                                                <div class="stat-label small text-muted">Products</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="stat-number text-warning">{{ brand.average_rating|floatformat:1 }}</div>
+                                                <div class="stat-label small text-muted">Rating</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2 mt-3">
+                                        <a href="{% url 'brand_detail' brand.slug %}" 
+                                           class="btn btn-outline-primary btn-sm">
+                                            View Products
+                                        </a>
+                                        {% if brand.website %}
+                                        <a href="{{ brand.website }}" 
+                                           target="_blank" 
+                                           class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-external-link-alt me-1"></i>Website
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No brands available at the moment.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Brand Categories -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="mb-4">Brand Categories</h2>
+            <div class="row">
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="brand-category luxury">
+                        <a href="{% url 'products' %}?brand_type=luxury" class="text-decoration-none">
+                            <div class="category-content p-4 rounded">
+                                <h3><i class="fas fa-gem me-2"></i>Luxury</h3>
+                                <p class="text-muted">High-end designer brands</p>
+                                <span class="badge bg-gold">Premium</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="brand-category streetwear">
+                        <a href="{% url 'products' %}?brand_type=streetwear" class="text-decoration-none">
+                            <div class="category-content p-4 rounded">
+                                <h3><i class="fas fa-tshirt me-2"></i>Streetwear</h3>
+                                <p class="text-muted">Urban and casual fashion</p>
+                                <span class="badge bg-info">Trendy</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="brand-category sustainable">
+                        <a href="{% url 'products' %}?brand_type=sustainable" class="text-decoration-none">
+                            <div class="category-content p-4 rounded">
+                                <h3><i class="fas fa-leaf me-2"></i>Sustainable</h3>
+                                <p class="text-muted">Eco-friendly brands</p>
+                                <span class="badge bg-success">Green</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="brand-category local">
+                        <a href="{% url 'products' %}?brand_type=local" class="text-decoration-none">
+                            <div class="category-content p-4 rounded">
+                                <h3><i class="fas fa-home me-2"></i>Local</h3>
+                                <p class="text-muted">Kenyan fashion brands</p>
+                                <span class="badge bg-primary">Local</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .brand-logo-wrapper {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        padding: 15px;
+    }
+    
+    .brand-logo {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    
+    .default-brand-logo {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        color: white;
+        border-radius: 50%;
+    }
+    
+    .featured-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #ffd700;
+        color: #000;
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .featured-brand {
+        transition: transform 0.3s;
+    }
+    
+    .featured-brand:hover {
+        transform: translateY(-5px);
+    }
+    
+    .brand-name {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #333;
+    }
+    
+    .star-rating {
+        color: #ffc107;
+    }
+    
+    /* Brand Card */
+    .brand-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .brand-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    
+    .brand-logo-small {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+        border-radius: 8px;
+        background: white;
+        padding: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .default-brand-logo-small {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 8px;
+        font-size: 1.2rem;
+    }
+    
+    .brand-stats .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+    
+    .brand-stats .stat-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Alphabet Navigation */
+    .alphabet-nav .btn {
+        width: 35px;
+        height: 35px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .letter-section {
+        scroll-margin-top: 20px;
+    }
+    
+    .letter-heading {
+        color: #ff6b6b;
+        border-bottom: 2px solid #ff6b6b;
+        padding-bottom: 10px;
+    }
+    
+    /* Brand Categories */
+    .brand-category .category-content {
+        background: white;
+        border: 2px solid #f8f9fa;
+        transition: all 0.3s;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .brand-category:hover .category-content {
+        border-color: #ff6b6b;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .brand-category.luxury .category-content h3 {
+        color: #d4af37;
+    }
+    
+    .brand-category.streetwear .category-content h3 {
+        color: #ff6b6b;
+    }
+    
+    .brand-category.sustainable .category-content h3 {
+        color: #00b894;
+    }
+    
+    .brand-category.local .category-content h3 {
+        color: #6c5ce7;
+    }
+    
+    .bg-gold {
+        background-color: #d4af37 !important;
+        color: white;
+    }
+    
+    /* Breadcrumb */
+    .breadcrumb {
+        background: none;
+        padding: 0;
+    }
+    
+    .breadcrumb-item a {
+        color: #ff6b6b;
+        text-decoration: none;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .brand-logo-wrapper {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .alphabet-nav .btn {
+            width: 30px;
+            height: 30px;
+            font-size: 0.8rem;
+        }
+        
+        .category-content {
+            height: 120px !important;
+            padding: 15px !important;
+        }
+        
+        .category-content h3 {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Brand search functionality
+    const searchInput = document.getElementById('brand-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            // Hide all letter sections
+            document.querySelectorAll('.letter-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show sections with matching brands
+            document.querySelectorAll('.brand-card').forEach(card => {
+                const brandName = card.querySelector('.card-title').textContent.toLowerCase();
+                const brandSection = card.closest('.letter-section');
+                
+                if (brandName.includes(searchTerm)) {
+                    card.style.display = '';
+                    brandSection.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Show message if no results
+            const visibleCards = document.querySelectorAll('.brand-card[style=""]');
+            if (visibleCards.length === 0 && searchTerm) {
+                // Show no results message
+                const noResults = document.createElement('div');
+                noResults.className = 'alert alert-info';
+                noResults.innerHTML = `
+                    <i class="fas fa-search me-2"></i>
+                    No brands found matching "${searchTerm}"
+                `;
+                
+                const brandsContainer = document.querySelector('.brands-alphabetical');
+                if (brandsContainer) {
+                    const existingAlert = brandsContainer.querySelector('.alert');
+                    if (existingAlert) existingAlert.remove();
+                    brandsContainer.prepend(noResults);
+                }
+            } else {
+                // Remove any existing no results message
+                const existingAlert = document.querySelector('.brands-alphabetical .alert');
+                if (existingAlert) existingAlert.remove();
+            }
+        });
+    }
+    
+    // Smooth scroll for alphabet navigation
+    document.querySelectorAll('.alphabet-nav a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

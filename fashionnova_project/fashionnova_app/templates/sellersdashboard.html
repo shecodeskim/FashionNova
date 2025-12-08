@@ -1,0 +1,1427 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Seller Dashboard - FashionNova{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Dashboard Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item active">Seller Dashboard</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-2">Seller Dashboard</h1>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-store me-2"></i>
+                        Welcome back, {{ request.user.sellerprofile.store_name }}
+                    </p>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" 
+                            data-bs-toggle="dropdown">
+                        <i class="fas fa-plus me-2"></i>Quick Actions
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="#add-product-modal" 
+                               data-bs-toggle="modal">
+                                <i class="fas fa-plus-circle me-2"></i>Add New Product
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'add_product' %}">
+                                <i class="fas fa-edit me-2"></i>Manage Products
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#manage-inventory">
+                                <i class="fas fa-boxes me-2"></i>Manage Inventory
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="#store-settings" 
+                               data-bs-toggle="modal">
+                                <i class="fas fa-cog me-2"></i>Store Settings
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dashboard Stats -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card revenue-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Revenue</h6>
+                            <h3 class="mb-0">Ksh {{ total_revenue|floatformat:0 }}</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up me-1"></i>12.5% from last month
+                            </small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-money-bill-wave fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card orders-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Orders</h6>
+                            <h3 class="mb-0">{{ total_orders }}</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up me-1"></i>8.2% from last month
+                            </small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-shopping-bag fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card products-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Products</h6>
+                            <h3 class="mb-0">{{ total_products }}</h3>
+                            <small class="text-muted">{{ active_products }} active</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-tshirt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card rating-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Store Rating</h6>
+                            <h3 class="mb-0">{{ store_rating|floatformat:1 }}/5.0</h3>
+                            <small class="text-muted">{{ total_reviews }} reviews</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-star fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Left Column: Quick Actions & Recent Orders -->
+        <div class="col-lg-8">
+            <!-- Recent Orders -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Orders</h5>
+                        <a href="{% url 'seller_orders' %}" class="btn btn-sm btn-outline-primary">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'order_detail' order.id %}" 
+                                           class="text-primary text-decoration-none">
+                                            #{{ order.order_number|slice:"-8:" }}
+                                        </a>
+                                    </td>
+                                    <td>{{ order.customer_name|truncatechars:20 }}</td>
+                                    <td>{{ order.created_at|date:"M d" }}</td>
+                                    <td>Ksh {{ order.total_amount }}</td>
+                                    <td>
+                                        <span class="badge {% if order.status == 'delivered' %}bg-success
+                                                          {% elif order.status == 'shipped' %}bg-primary
+                                                          {% elif order.status == 'processing' %}bg-info
+                                                          {% elif order.status == 'pending' %}bg-warning
+                                                          {% else %}bg-danger{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary update-status-btn" 
+                                                data-order-id="{{ order.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <i class="fas fa-inbox fa-2x text-muted mb-3"></i>
+                                        <p class="text-muted mb-0">No orders yet</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product Management -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Product Management</h5>
+                        <a href="{% url 'add_product' %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus me-1"></i>Add Product
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" 
+                                       placeholder="Search products...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="category-filter">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="status-filter">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="low_stock">Low Stock</option>
+                                <option value="out_of_stock">Out of Stock</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="products-table">
+                            <thead>
+                                <tr>
+                                    <th width="60">
+                                        <input type="checkbox" id="select-all-products">
+                                    </th>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in recent_products %}
+                                <tr id="product-{{ product.id }}">
+                                    <td>
+                                        <input type="checkbox" class="product-select" 
+                                               value="{{ product.id }}">
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0 me-3">
+                                                {% if product.image %}
+                                                <img src="{{ product.image.url }}" 
+                                                     alt="{{ product.name }}"
+                                                     class="img-thumbnail" 
+                                                     width="50"
+                                                     onerror="this.src='{% static 'images/products/default-product.jpg' %}'">
+                                                {% else %}
+                                                <img src="{% static 'images/products/default-product.jpg' %}" 
+                                                     alt="{{ product.name }}"
+                                                     class="img-thumbnail" 
+                                                     width="50">
+                                                {% endif %}
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">{{ product.name|truncatechars:30 }}</h6>
+                                                <small class="text-muted">SKU: {{ product.sku|default:"N/A" }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ product.category.name }}</td>
+                                    <td>
+                                        <div>
+                                            {% if product.discount_price %}
+                                            <span class="text-decoration-line-through text-muted small">
+                                                Ksh {{ product.price }}
+                                            </span><br>
+                                            <strong class="text-primary">Ksh {{ product.discount_price }}</strong>
+                                            {% else %}
+                                            <strong class="text-primary">Ksh {{ product.price }}</strong>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="stock-info">
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar {% if product.stock > 20 %}bg-success
+                                                                       {% elif product.stock > 10 %}bg-warning
+                                                                       {% else %}bg-danger{% endif %}" 
+                                                     style="width: {% widthratio product.stock product.low_stock_threshold 100 %}%">
+                                                </div>
+                                            </div>
+                                            <small>{{ product.stock }} units</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if product.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button class="btn btn-outline-primary edit-product-btn" 
+                                                    data-product-id="{{ product.id }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info view-product-btn" 
+                                                    onclick="window.open('{% url 'product_detail' product.slug %}', '_blank')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {% if product.is_active %}
+                                            <button class="btn btn-outline-warning toggle-product-btn" 
+                                                    data-product-id="{{ product.id }}" 
+                                                    data-action="deactivate">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                            {% else %}
+                                            <button class="btn btn-outline-success toggle-product-btn" 
+                                                    data-product-id="{{ product.id }}" 
+                                                    data-action="activate">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            {% endif %}
+                                            <button class="btn btn-outline-danger delete-product-btn" 
+                                                    data-product-id="{{ product.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <i class="fas fa-box-open fa-2x text-muted mb-3"></i>
+                                        <p class="text-muted mb-2">No products yet</p>
+                                        <a href="{% url 'add_product' %}" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-plus me-1"></i>Add Your First Product
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Bulk Actions -->
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="select-all">
+                            <label class="form-check-label" for="select-all">
+                                Select All
+                            </label>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary" id="activate-selected">
+                                <i class="fas fa-check me-2"></i>Activate
+                            </button>
+                            <button class="btn btn-outline-warning" id="deactivate-selected">
+                                <i class="fas fa-ban me-2"></i>Deactivate
+                            </button>
+                            <button class="btn btn-outline-danger" id="delete-selected">
+                                <i class="fas fa-trash me-2"></i>Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Store Info & Quick Stats -->
+        <div class="col-lg-4">
+            <!-- Store Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-store-alt me-2"></i>Store Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="store-info text-center mb-4">
+                        <div class="store-logo mb-3">
+                            {% if request.user.profile_picture %}
+                            <img src="{{ request.user.profile_picture.url }}" 
+                                 alt="{{ request.user.sellerprofile.store_name }}"
+                                 class="rounded-circle" 
+                                 width="80" height="80">
+                            {% else %}
+                            <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center" 
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-store fa-2x text-muted"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <h4>{{ request.user.sellerprofile.store_name }}</h4>
+                        <p class="text-muted">
+                            <i class="fas fa-star text-warning"></i>
+                            {{ store_rating|floatformat:1 }} ({{ total_reviews }} reviews)
+                        </p>
+                    </div>
+                    
+                    <div class="store-details">
+                        <div class="detail-item mb-3">
+                            <small class="text-muted d-block mb-1">Store Description</small>
+                            <p class="mb-0">{{ request.user.sellerprofile.description|default:"No description added" }}</p>
+                        </div>
+                        
+                        <div class="detail-item mb-3">
+                            <small class="text-muted d-block mb-1">Contact Information</small>
+                            <p class="mb-1">
+                                <i class="fas fa-envelope me-2"></i>
+                                {{ request.user.email }}
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-phone me-2"></i>
+                                {{ request.user.phone|default:"Not provided" }}
+                            </p>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <small class="text-muted d-block mb-1">Store Statistics</small>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="text-center p-2">
+                                        <h6 class="mb-1">{{ visitor_count }}</h6>
+                                        <small class="text-muted">Visitors</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center p-2">
+                                        <h6 class="mb-1">{{ conversion_rate }}%</h6>
+                                        <small class="text-muted">Conversion</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'profile' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit me-2"></i>Edit Store Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="quick-stats">
+                        <div class="stat-item mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Today's Revenue</span>
+                                <strong class="text-success">Ksh {{ today_revenue }}</strong>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar bg-success" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Pending Orders</span>
+                                <strong class="text-warning">{{ pending_orders_count }}</strong>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar bg-warning" style="width: 40%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Low Stock Items</span>
+                                <strong class="text-danger">{{ low_stock_count }}</strong>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar bg-danger" style="width: 25%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Customer Satisfaction</span>
+                                <strong class="text-info">{{ satisfaction_rate }}%</strong>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar bg-info" style="width: 90%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Reviews -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-comments me-2"></i>Recent Reviews</h5>
+                </div>
+                <div class="card-body">
+                    {% for review in recent_reviews %}
+                    <div class="review-item mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="mb-1">{{ review.user.username }}</h6>
+                                <div class="rating small">
+                                    {% for i in "12345" %}
+                                    <i class="fas fa-star{% if forloop.counter <= review.rating %}{% else %}-o{% endif %} 
+                                       {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}">
+                                    </i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ review.created_at|timesince }} ago</small>
+                        </div>
+                        <p class="mb-2 small">{{ review.comment|truncatechars:80 }}</p>
+                        <a href="{% url 'product_detail' review.product.slug %}" 
+                           class="small text-decoration-none">
+                            {{ review.product.name|truncatechars:30 }}
+                        </a>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-comment-alt fa-2x text-muted mb-3"></i>
+                        <p class="text-muted mb-0">No reviews yet</p>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if recent_reviews %}
+                    <div class="text-center mt-3">
+                        <a href="#" class="btn btn-sm btn-outline-primary">View All Reviews</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="add-product-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-product-form" method="POST" enctype="multipart/form-data" 
+                      action="{% url 'add_product' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Product Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>Product Information</h6>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="product-name" class="form-label">Product Name *</label>
+                            <input type="text" class="form-control" id="product-name" 
+                                   name="name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="product-sku" class="form-label">SKU (Optional)</label>
+                            <input type="text" class="form-control" id="product-sku" 
+                                   name="sku" placeholder="e.g., FN-001">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="product-description" class="form-label">Description *</label>
+                            <textarea class="form-control" id="product-description" 
+                                      name="description" rows="3" required></textarea>
+                        </div>
+                        <!-- Update these sections in your add-product-modal -->
+                         <!-- Update these sections in your add-product-modal -->
+
+<!-- Category dropdown - FIXED -->
+<div class="col-md-6 mb-3">
+    <label for="product-category" class="form-label">Category *</label>
+    <select class="form-select" id="product-category" name="category" required>
+        <option value="">Select Category</option>
+        <!-- Remove these hardcoded options or keep them if needed -->
+        <!-- 
+        <option value="W">Women</option>
+        <option value="M">Men</option>
+        <option value="K">Kids</option>
+        <option value="U">Unisex</option>
+        -->
+        {% for category in categories %}
+        <option value="{{ category.id }}">{{ category.name }}</option>
+        {% empty %}
+        <!-- If no categories exist, show default options -->
+        <option value="1">Women's Fashion</option>
+        <option value="2">Men's Fashion</option>
+        <option value="3">Kids' Fashion</option>
+        <option value="4">Unisex</option>
+        <option value="5">Accessories</option>
+        <option value="6">Footwear</option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- Brand dropdown - FIXED -->
+<div class="col-md-6 mb-3">
+    <label for="product-brand" class="form-label">Brand (Optional)</label>
+    <select class="form-select" id="product-brand" name="brand">
+        <option value="">Select Brand</option>
+        {% for brand in brands %}
+        <option value="{{ brand.id }}">{{ brand.name }}</option>
+        {% empty %}
+        <!-- If no brands exist, show default options -->
+        <option value="1">Nike</option>
+        <option value="2">Adidas</option>
+        <option value="3">Gucci</option>
+        <option value="4">Zara</option>
+        <option value="5">H&M</option>
+        <option value="6">FashionNova</option>
+        <option value="7">Puma</option>
+        <option value="8">Levi's</option>
+        <option value="9">Calvin Klein</option>
+        <option value="10">Tommy Hilfiger</option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- Gender dropdown  -->
+<div class="col-md-6 mb-3">
+    <label for="product-gender" class="form-label">Gender</label>
+    <select class="form-select" id="product-gender" name="gender">
+        <option value="U">Unisex</option>
+        <option value="M">Men</option>
+        <option value="F">Women</option>
+        <option value="K">Kids</option>
+    </select>
+</div>
+                    <!-- Pricing & Inventory -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="mb-3"><i class="fas fa-tags me-2"></i>Pricing & Inventory</h6>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="product-price" class="form-label">Price (Ksh) *</label>
+                            <input type="number" class="form-control" id="product-price" 
+                                   name="price" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="product-compare-price" class="form-label">Compare at Price (Optional)</label>
+                            <input type="number" class="form-control" id="product-compare-price" 
+                                   name="compare_at_price" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="product-cost" class="form-label">Cost Price (Optional)</label>
+                            <input type="number" class="form-control" id="product-cost" 
+                                   name="cost_price" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="product-stock" class="form-label">Stock Quantity *</label>
+                            <input type="number" class="form-control" id="product-stock" 
+                                   name="stock" min="0" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="product-low-stock" class="form-label">Low Stock Threshold</label>
+                            <input type="number" class="form-control" id="product-low-stock" 
+                                   name="low_stock_threshold" min="1" value="10">
+                        </div>
+                    </div>
+                    
+                    <!-- Product Attributes -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="mb-3"><i class="fas fa-list-alt me-2"></i>Product Attributes</h6>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Sizes (Comma separated)</label>
+                            <input type="text" class="form-control" name="size" 
+                                   placeholder="e.g., S, M, L, XL">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Colors (Comma separated)</label>
+                            <input type="text" class="form-control" name="color" 
+                                   placeholder="e.g., Red, Blue, Black">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Material</label>
+                            <input type="text" class="form-control" name="material" 
+                                   placeholder="e.g., Cotton, Polyester">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Weight (kg)</label>
+                            <input type="number" class="form-control" name="weight" 
+                                   step="0.001" min="0" placeholder="0.5">
+                        </div>
+                    </div>
+                    
+                    <!-- Product Images -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="mb-3"><i class="fas fa-images me-2"></i>Product Images</h6>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="main-image" class="form-label">Main Image *</label>
+                            <input type="file" class="form-control" id="main-image" 
+                                   name="main_image" accept="image/*" required>
+                            <small class="text-muted">Recommended size: 800x800 pixels</small>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="gallery-images" class="form-label">Gallery Images (Optional)</label>
+                            <input type="file" class="form-control" id="gallery-images" 
+                                   name="gallery_images" accept="image/*" multiple>
+                            <small class="text-muted">You can upload up to 5 additional images</small>
+                        </div>
+                    </div>
+                    
+                    <!-- SEO & Settings -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="mb-3"><i class="fas fa-search me-2"></i>SEO & Settings</h6>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="meta-title" class="form-label">Meta Title (Optional)</label>
+                            <input type="text" class="form-control" id="meta-title" 
+                                   name="meta_title" maxlength="60">
+                            <small class="text-muted">Recommended: 50-60 characters</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="meta-description" class="form-label">Meta Description (Optional)</label>
+                            <textarea class="form-control" id="meta-description" 
+                                      name="meta_description" rows="2" maxlength="160"></textarea>
+                            <small class="text-muted">Recommended: 150-160 characters</small>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" 
+                                       id="featured-product" name="is_featured">
+                                <label class="form-check-label" for="featured-product">
+                                    Mark as Featured Product
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" 
+                                       id="new-arrival" name="is_new" checked>
+                                <label class="form-check-label" for="new-arrival">
+                                    Mark as New Arrival
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       id="active-product" name="is_active" checked>
+                                <label class="form-check-label" for="active-product">
+                                    Publish Product Immediately
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="add-product-form" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Product
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Store Settings Modal -->
+<div class="modal fade" id="store-settings" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Store Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="store-settings-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="store-name" class="form-label">Store Name</label>
+                        <input type="text" class="form-control" id="store-name" 
+                               value="{{ request.user.sellerprofile.store_name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="store-description" class="form-label">Store Description</label>
+                        <textarea class="form-control" id="store-description" rows="3">{{ request.user.sellerprofile.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notification-email" class="form-label">Notification Email</label>
+                        <input type="email" class="form-control" id="notification-email" 
+                               value="{{ request.user.email }}">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="email-notifications" checked>
+                        <label class="form-check-label" for="email-notifications">
+                            Receive email notifications for new orders
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="low-stock-alerts" checked>
+                        <label class="form-check-label" for="low-stock-alerts">
+                            Receive low stock alerts
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="save-store-settings">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden CSRF Token for JavaScript -->
+<input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+
+<style>
+    .breadcrumb {
+        background: none;
+        padding: 0;
+    }
+    
+    .breadcrumb-item a {
+        color: #ff6b6b;
+        text-decoration: none;
+    }
+    
+    .stat-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .revenue-card {
+        background: linear-gradient(135deg, #6b81e6ff 0%, #479deeff 100%);
+        color:black;
+    }
+    
+    .orders-card {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+    
+    .products-card {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+    
+    .rating-card {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: white;
+    }
+    
+    .stat-icon {
+        opacity: 0.8;
+    }
+    
+    .store-info {
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .store-logo img {
+        border: 4px solid white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .detail-item {
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #eee;
+    }
+    
+    .quick-stats .progress {
+        margin-top: 5px;
+    }
+    
+    .review-item {
+        transition: background-color 0.3s;
+    }
+    
+    .review-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .rating {
+        color: #ffc107;
+    }
+    
+    .stock-info .progress {
+        margin-bottom: 5px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-outline-primary {
+        color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+    
+    .modal-header {
+        border-bottom: 2px solid #ff6b6b;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+    }
+    
+    .form-check-input:checked {
+        background-color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+</style>
+
+<script>
+// Get CSRF token from hidden input
+function getCSRFToken() {
+    return document.getElementById('csrf_token').value;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Select all products functionality
+    const selectAll = document.getElementById('select-all-products');
+    const productSelects = document.querySelectorAll('.product-select');
+    
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            productSelects.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+    }
+    
+    // Individual checkbox functionality
+    productSelects.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const allChecked = Array.from(productSelects).every(cb => cb.checked);
+            if (selectAll) selectAll.checked = allChecked;
+        });
+    });
+    
+    // Bulk actions
+    document.getElementById('activate-selected')?.addEventListener('click', function() {
+        const selectedIds = getSelectedProductIds();
+        if (selectedIds.length > 0) {
+            if (confirm(`Are you sure you want to activate ${selectedIds.length} product(s)?`)) {
+                updateProductsStatus(selectedIds, 'activate');
+            }
+        } else {
+            showToast('Please select products to activate', 'warning');
+        }
+    });
+    
+    document.getElementById('deactivate-selected')?.addEventListener('click', function() {
+        const selectedIds = getSelectedProductIds();
+        if (selectedIds.length > 0) {
+            if (confirm(`Are you sure you want to deactivate ${selectedIds.length} product(s)?`)) {
+                updateProductsStatus(selectedIds, 'deactivate');
+            }
+        } else {
+            showToast('Please select products to deactivate', 'warning');
+        }
+    });
+    
+    document.getElementById('delete-selected')?.addEventListener('click', function() {
+        const selectedIds = getSelectedProductIds();
+        if (selectedIds.length > 0) {
+            if (confirm(`Are you sure you want to delete ${selectedIds.length} product(s)? This action cannot be undone.`)) {
+                deleteProducts(selectedIds);
+            }
+        } else {
+            showToast('Please select products to delete', 'warning');
+        }
+    });
+    
+    // Individual product actions
+    document.querySelectorAll('.edit-product-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            editProduct(productId);
+        });
+    });
+    
+    document.querySelectorAll('.toggle-product-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const action = this.getAttribute('data-action');
+            const actionText = action === 'activate' ? 'activate' : 'deactivate';
+            if (confirm(`Are you sure you want to ${actionText} this product?`)) {
+                toggleProductStatus(productId, action);
+            }
+        });
+    });
+    
+    document.querySelectorAll('.delete-product-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+                deleteProduct(productId);
+            }
+        });
+    });
+    
+    // Order status update
+    document.querySelectorAll('.update-status-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const orderId = this.getAttribute('data-order-id');
+            updateOrderStatus(orderId);
+        });
+    });
+    
+    // Store settings form
+    document.getElementById('save-store-settings')?.addEventListener('click', function() {
+        const formData = {
+            store_name: document.getElementById('store-name').value,
+            description: document.getElementById('store-description').value,
+            notification_email: document.getElementById('notification-email').value,
+            email_notifications: document.getElementById('email-notifications').checked,
+            low_stock_alerts: document.getElementById('low-stock-alerts').checked,
+            csrfmiddlewaretoken: getCSRFToken()
+        };
+        
+        saveStoreSettings(formData);
+    });
+    
+    // Product search and filter
+    const searchInput = document.querySelector('input[placeholder="Search products..."]');
+    const categoryFilter = document.getElementById('category-filter');
+    const statusFilter = document.getElementById('status-filter');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', filterProducts);
+    }
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', filterProducts);
+    }
+    if (statusFilter) {
+        statusFilter.addEventListener('change', filterProducts);
+    }
+    
+    // Helper functions
+    function getSelectedProductIds() {
+        const selectedIds = [];
+        document.querySelectorAll('.product-select:checked').forEach(checkbox => {
+            selectedIds.push(checkbox.value);
+        });
+        return selectedIds;
+    }
+    
+    function filterProducts() {
+        const searchTerm = searchInput?.value.toLowerCase() || '';
+        const categoryValue = categoryFilter?.value || '';
+        const statusValue = statusFilter?.value || '';
+        
+        document.querySelectorAll('#products-table tbody tr').forEach(row => {
+            const productName = row.querySelector('h6').textContent.toLowerCase();
+            const category = row.querySelector('td:nth-child(3)').textContent;
+            const statusBadge = row.querySelector('td:nth-child(6) .badge');
+            const status = statusBadge ? statusBadge.textContent.toLowerCase() : '';
+            const stockText = row.querySelector('td:nth-child(5) small');
+            const stock = stockText ? parseInt(stockText.textContent) : 0;
+            
+            let show = true;
+            
+            // Search filter
+            if (searchTerm && !productName.includes(searchTerm)) {
+                show = false;
+            }
+            
+            // Category filter
+            if (categoryValue && category !== categoryValue) {
+                show = false;
+            }
+            
+            // Status filter
+            if (statusValue === 'active' && status !== 'active') {
+                show = false;
+            } else if (statusValue === 'inactive' && status !== 'inactive') {
+                show = false;
+            } else if (statusValue === 'low_stock' && stock > 10) {
+                show = false;
+            } else if (statusValue === 'out_of_stock' && stock > 0) {
+                show = false;
+            }
+            
+            row.style.display = show ? '' : 'none';
+        });
+    }
+    
+    function updateProductsStatus(productIds, action) {
+        const csrfToken = getCSRFToken();
+        
+        fetch('/seller/update-products-status/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_ids: productIds,
+                action: action,
+                csrfmiddlewaretoken: csrfToken
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast(`${data.updated_count || productIds.length} product(s) ${action}d successfully`, 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast(data.message || 'Failed to update products', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred. Please try again.', 'error');
+        });
+    }
+    
+    function deleteProducts(productIds) {
+        const csrfToken = getCSRFToken();
+        
+        fetch('/seller/delete-products/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_ids: productIds,
+                csrfmiddlewaretoken: csrfToken
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast(`${data.deleted_count || productIds.length} product(s) deleted successfully`, 'success');
+                // Remove from table
+                productIds.forEach(id => {
+                    const row = document.getElementById(`product-${id}`);
+                    if (row) row.remove();
+                });
+                // Check if table is empty
+                if (document.querySelectorAll('#products-table tbody tr[style*="display"]').length === 0) {
+                    location.reload();
+                }
+            } else {
+                showToast(data.message || 'Failed to delete products', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred. Please try again.', 'error');
+        });
+    }
+    
+    function editProduct(productId) {
+        window.location.href = `/seller/edit-product/${productId}/`;
+    }
+    
+    function toggleProductStatus(productId, action) {
+        const csrfToken = getCSRFToken();
+        
+        fetch(`/seller/toggle-product/${productId}/${action}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                csrfmiddlewaretoken: csrfToken
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast(`Product ${action}d successfully`, 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast(data.message || 'Failed to update product status', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred. Please try again.', 'error');
+        });
+    }
+    
+    function deleteProduct(productId) {
+        const csrfToken = getCSRFToken();
+        
+        fetch(`/seller/delete-product/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                csrfmiddlewaretoken: csrfToken
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast('Product deleted successfully', 'success');
+                const row = document.getElementById(`product-${productId}`);
+                if (row) row.remove();
+                // Check if table is empty
+                if (document.querySelectorAll('#products-table tbody tr').length === 0) {
+                    location.reload();
+                }
+            } else {
+                showToast(data.message || 'Failed to delete product', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred. Please try again.', 'error');
+        });
+    }
+    
+    function updateOrderStatus(orderId) {
+        // Show status update modal
+        const modalHtml = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update Order Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <select class="form-select" id="new-status">
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirm-status-update">Save</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const modalElement = document.createElement('div');
+        modalElement.className = 'modal fade';
+        modalElement.innerHTML = modalHtml;
+        document.body.appendChild(modalElement);
+        
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        
+        document.getElementById('confirm-status-update').addEventListener('click', function() {
+            const newStatus = document.getElementById('new-status').value;
+            const csrfToken = getCSRFToken();
+            
+            fetch(`/seller/update-order-status/${orderId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    status: newStatus,
+                    csrfmiddlewaretoken: csrfToken 
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showToast('Order status updated successfully', 'success');
+                    modal.hide();
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(data.message || 'Failed to update order status', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            });
+        });
+        
+        // Clean up modal after hiding
+        modalElement.addEventListener('hidden.bs.modal', function() {
+            document.body.removeChild(modalElement);
+        });
+    }
+    
+    function saveStoreSettings(data) {
+        const csrfToken = getCSRFToken();
+        
+        fetch('/seller/save-store-settings/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast('Store settings saved successfully', 'success');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('store-settings'));
+                modal.hide();
+            } else {
+                showToast(data.message || 'Failed to save settings', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred. Please try again.', 'error');
+        });
+    }
+    
+    function showToast(message, type) {
+        // Remove existing toasts
+        const existingToasts = document.querySelectorAll('.toast-container');
+        existingToasts.forEach(toast => toast.remove());
+        
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'danger'} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" 
+                        data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        const container = document.createElement('div');
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.appendChild(toast);
+        document.body.appendChild(container);
+        
+        const bsToast = new bootstrap.Toast(toast, {
+            autohide: true,
+            delay: 3000
+        });
+        bsToast.show();
+        
+        toast.addEventListener('hidden.bs.toast', function() {
+            container.remove();
+        });
+    }
+});
+</script>
+{% endblock %}

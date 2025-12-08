@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FashionNova - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section mb-5">
+    <div class="row align-items-center bg-light p-5 rounded">
+        <div class="col-md-6">
+            <h1 class="display-4 fw-bold">Discover Your Style</h1>
+            <p class="lead">Shop the latest fashion trends from top brands. Free shipping on orders over Ksh 5,000.</p>
+            <a href="{% url 'products' %}" class="btn btn-primary btn-lg">Shop Now</a>
+        </div>
+        <div class="col-md-6">
+            <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" 
+                 class="img-fluid rounded" alt="Fashion Model">
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="categories-section mb-5">
+    <h2 class="mb-4">Shop by Category</h2>
+    <div class="row">
+        {% for category in categories %}
+        <div class="col-md-4 col-lg-2 mb-3">
+            <a href="{% url 'products' %}?category={{ category.id }}" class="text-decoration-none">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-tshirt fa-2x mb-2 text-primary"></i>
+                        <h5 class="card-title">{{ category.name }}</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="featured-products mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Featured Products</h2>
+        <a href="{% url 'products' %}" class="btn btn-outline-primary">View All</a>
+    </div>
+    
+    <div class="row">
+        {% for product in featured_products %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                {% if product.discount_price %}
+                <span class="position-absolute top-0 end-0 badge badge-discount m-2">
+                    {{ product.get_discount_percentage }}% OFF
+                </span>
+                {% endif %}
+                <img src="{{ product.image.url }}" class="card-img-top product-image" alt="{{ product.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name|truncatechars:30 }}</h5>
+                    <p class="card-text text-muted">{{ product.category.name }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if product.discount_price %}
+                            <span class="text-decoration-line-through text-muted">Ksh {{ product.price }}</span>
+                            <span class="h5 text-primary"> Ksh {{ product.discount_price }}</span>
+                            {% else %}
+                            <span class="h5 text-primary">Ksh {{ product.price }}</span>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'add_to_cart' product.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-cart-plus"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <a href="{% url 'product_detail' product.slug %}" class="btn btn-primary btn-sm w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Discounted Products -->
+<section class="discounted-products">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Hot Deals</h2>
+        <a href="{% url 'products' %}?discount_only=on" class="btn btn-outline-danger">View All Deals</a>
+    </div>
+    
+    <div class="row">
+        {% for product in discounted_products %}
+        <div class="col-md-2 mb-4">
+            <div class="card h-100">
+                <span class="position-absolute top-0 end-0 badge bg-danger m-1">
+                    SALE
+                </span>
+                <img src="{{ product.image.url }}" class="card-img-top product-image" alt="{{ product.name }}">
+                <div class="card-body p-2">
+                    <h6 class="card-title">{{ product.name|truncatechars:20 }}</h6>
+                    <div>
+                        <span class="text-decoration-line-through text-muted small">Ksh {{ product.price }}</span>
+                        <span class="h6 text-danger"> Ksh {{ product.discount_price }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

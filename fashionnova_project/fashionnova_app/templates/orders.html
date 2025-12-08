@@ -1,0 +1,873 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Orders - FashionNova{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'profile' %}">My Account</a></li>
+                    <li class="breadcrumb-item active">My Orders</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-2">My Orders</h1>
+                    <p class="text-muted">
+                        <i class="fas fa-history me-2"></i>
+                        Track and manage your orders
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'products' %}" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Orders Tabs -->
+    <div class="row">
+        <div class="col-lg-3">
+            <!-- Orders Filter/Sidebar -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Orders</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'orders' %}" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if not status_filter %}active{% endif %}">
+                            All Orders
+                            <span class="badge bg-primary rounded-pill">{{ total_orders }}</span>
+                        </a>
+                        <a href="{% url 'orders' %}?status=pending" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if status_filter == 'pending' %}active{% endif %}">
+                            <span>
+                                <i class="fas fa-clock text-warning me-2"></i>Pending
+                            </span>
+                            <span class="badge bg-warning rounded-pill">{{ pending_orders }}</span>
+                        </a>
+                        <a href="{% url 'orders' %}?status=processing" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if status_filter == 'processing' %}active{% endif %}">
+                            <span>
+                                <i class="fas fa-cog text-info me-2"></i>Processing
+                            </span>
+                            <span class="badge bg-info rounded-pill">{{ processing_orders }}</span>
+                        </a>
+                        <a href="{% url 'orders' %}?status=shipped" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if status_filter == 'shipped' %}active{% endif %}">
+                            <span>
+                                <i class="fas fa-truck text-primary me-2"></i>Shipped
+                            </span>
+                            <span class="badge bg-primary rounded-pill">{{ shipped_orders }}</span>
+                        </a>
+                        <a href="{% url 'orders' %}?status=delivered" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if status_filter == 'delivered' %}active{% endif %}">
+                            <span>
+                                <i class="fas fa-check-circle text-success me-2"></i>Delivered
+                            </span>
+                            <span class="badge bg-success rounded-pill">{{ delivered_orders }}</span>
+                        </a>
+                        <a href="{% url 'orders' %}?status=cancelled" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if status_filter == 'cancelled' %}active{% endif %}">
+                            <span>
+                                <i class="fas fa-times-circle text-danger me-2"></i>Cancelled
+                            </span>
+                            <span class="badge bg-danger rounded-pill">{{ cancelled_orders }}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Stats -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Order Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="order-stats">
+                        <div class="stat-item mb-3">
+                            <small class="text-muted d-block mb-1">Total Orders</small>
+                            <h4 class="mb-0">{{ total_orders }}</h4>
+                        </div>
+                        <div class="stat-item mb-3">
+                            <small class="text-muted d-block mb-1">Total Spent</small>
+                            <h4 class="mb-0">Ksh {{ total_spent }}</h4>
+                        </div>
+                        <div class="stat-item mb-3">
+                            <small class="text-muted d-block mb-1">Avg. Order Value</small>
+                            <h4 class="mb-0">Ksh {{ avg_order_value }}</h4>
+                        </div>
+                        <div class="stat-item">
+                            <small class="text-muted d-block mb-1">Success Rate</small>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 10px;">
+                                    <div class="progress-bar bg-success" 
+                                         style="width: {{ success_rate }}%"></div>
+                                </div>
+                                <span>{{ success_rate }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="mb-3">Quick Actions</h6>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'checkout' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-shopping-cart me-2"></i>Create New Order
+                        </a>
+                        <button class="btn btn-outline-secondary" id="export-orders">
+                            <i class="fas fa-download me-2"></i>Export Orders
+                        </button>
+                        <button class="btn btn-outline-secondary" data-bs-toggle="modal" 
+                                data-bs-target="#reorderModal">
+                            <i class="fas fa-redo me-2"></i>Reorder Items
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Orders List -->
+        <div class="col-lg-9">
+            {% if orders %}
+            <!-- Search and Filter -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" 
+                                       placeholder="Search orders by ID or product..." 
+                                       id="order-search">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="time-filter">
+                                <option value="">All Time</option>
+                                <option value="7">Last 7 Days</option>
+                                <option value="30">Last 30 Days</option>
+                                <option value="90">Last 3 Months</option>
+                                <option value="365">Last Year</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="sort-orders">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="price_high">Highest Amount</option>
+                                <option value="price_low">Lowest Amount</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Orders List -->
+            <div class="orders-list">
+                {% for order in orders %}
+                <div class="card order-card mb-4">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">Order #{{ order.order_number }}</h6>
+                                <small class="text-muted">
+                                    {{ order.created_at|date:"F d, Y" }} at {{ order.created_at|time:"g:i A" }}
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge {% if order.status == 'delivered' %}bg-success
+                                                  {% elif order.status == 'cancelled' %}bg-danger
+                                                  {% elif order.status == 'shipped' %}bg-primary
+                                                  {% elif order.status == 'processing' %}bg-info
+                                                  {% else %}bg-warning{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                                <div class="mt-1">
+                                    <strong class="text-primary">Ksh {{ order.total_amount }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <!-- Order Items -->
+                        <div class="order-items mb-3">
+                            {% for item in order.items.all|slice:":3" %}
+                            <div class="order-item d-flex mb-2">
+                                <div class="flex-shrink-0">
+                                    {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" 
+                                         alt="{{ item.product.name }}"
+                                         class="img-thumbnail" 
+                                         width="60"
+                                         onerror="this.src='{% static 'images/products/default-product.jpg' %}'">
+                                    {% else %}
+                                    <img src="{% static 'images/products/default-product.jpg' %}" 
+                                         alt="{{ item.product.name }}"
+                                         class="img-thumbnail" 
+                                         width="60">
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1">
+                                        {{ item.product.name }}
+                                        <span class="text-muted">× {{ item.quantity }}</span>
+                                    </h6>
+                                    <div class="text-muted small">
+                                        <span>Ksh {{ item.unit_price }} each</span>
+                                        <span class="mx-2">•</span>
+                                        <span>Total: Ksh {{ item.total_price }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if order.items.count > 3 %}
+                            <div class="text-center">
+                                <small class="text-muted">
+                                    +{{ order.items.count|add:"-3" }} more item(s)
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Order Summary -->
+                        <div class="order-summary bg-light p-3 rounded mb-3">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block">Payment</small>
+                                    <strong>{{ order.get_payment_method_display }}</strong>
+                                    <div class="mt-1">
+                                        <span class="badge {% if order.payment_status %}bg-success{% else %}bg-warning{% endif %}">
+                                            {% if order.payment_status %}Paid{% else %}Pending{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block">Delivery</small>
+                                    <strong>
+                                        {% if order.shipping_method %}{{ order.shipping_method }}{% else %}Standard{% endif %}
+                                    </strong>
+                                    {% if order.tracking_number %}
+                                    <div class="mt-1">
+                                        <small class="text-muted">Tracking: {{ order.tracking_number }}</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block">Estimated Delivery</small>
+                                    <strong>
+                                        {% if order.estimated_delivery %}
+                                        {{ order.estimated_delivery|date:"M d, Y" }}
+                                        {% else %}
+                                        Calculating...
+                                        {% endif %}
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Order Actions -->
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-2"></i>View Details
+                                </a>
+                                <button class="btn btn-sm btn-outline-secondary track-order-btn" 
+                                        data-order-id="{{ order.id }}"
+                                        {% if not order.tracking_number %}disabled{% endif %}>
+                                    <i class="fas fa-map-marker-alt me-2"></i>Track Order
+                                </button>
+                            </div>
+                            <div>
+                                {% if order.status == 'pending' or order.status == 'processing' %}
+                                <button class="btn btn-sm btn-outline-danger cancel-order-btn" 
+                                        data-order-id="{{ order.id }}">
+                                    <i class="fas fa-times me-2"></i>Cancel Order
+                                </button>
+                                {% endif %}
+                                
+                                {% if order.status == 'delivered' %}
+                                <a href="#" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-redo me-2"></i>Reorder
+                                </a>
+                                <a href="#" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-star me-2"></i>Write Review
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if orders.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if orders.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in orders.paginator.page_range %}
+                        {% if orders.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if orders.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+            {% else %}
+            <!-- Empty Orders -->
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <div class="empty-orders-icon mb-4">
+                        <i class="fas fa-shopping-bag fa-4x text-muted"></i>
+                    </div>
+                    <h3 class="mb-3">No orders yet</h3>
+                    <p class="text-muted mb-4">
+                        When you place orders, they will appear here for you to track and manage.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'products' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+                        </a>
+                        <a href="{% url 'categories' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-list me-2"></i>Browse Categories
+                        </a>
+                    </div>
+                    
+                    <!-- Popular Products -->
+                    <div class="mt-5">
+                        <h5 class="mb-4">Popular Products</h5>
+                        <div class="row g-3">
+                            {% for product in popular_products %}
+                            <div class="col-md-3 col-6">
+                                <a href="{% url 'product_detail' product.slug %}" 
+                                   class="text-decoration-none">
+                                    <div class="product-card-small">
+                                        <div class="product-image-small mb-2">
+                                            {% if product.image %}
+                                            <img src="{{ product.image.url }}" 
+                                                 alt="{{ product.name }}"
+                                                 class="img-fluid rounded"
+                                                 onerror="this.src='{% static 'images/products/default-product.jpg' %}'">
+                                            {% else %}
+                                            <img src="{% static 'images/products/default-product.jpg' %}" 
+                                                 alt="{{ product.name }}"
+                                                 class="img-fluid rounded">
+                                            {% endif %}
+                                        </div>
+                                        <h6 class="mb-1">{{ product.name|truncatechars:20 }}</h6>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-primary">
+                                                Ksh {% if product.discount_price %}{{ product.discount_price }}{% else %}{{ product.price }}{% endif %}
+                                            </span>
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-star"></i> {{ product.average_rating|default:"0.0" }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Track Order Modal -->
+<div class="modal fade" id="trackOrderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Track Your Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="tracking-details">
+                    <!-- Tracking details loaded via AJAX -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reorder Modal -->
+<div class="modal fade" id="reorderModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reorder Previous Items</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th width="60"></th>
+                                <th>Product</th>
+                                <th>Previous Price</th>
+                                <th>Quantity</th>
+                                <th>Current Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reorder-items">
+                            <!-- Reorder items loaded via AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="add-reorder-to-cart">
+                    <i class="fas fa-cart-plus me-2"></i>Add Selected to Cart
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .breadcrumb {
+        background: none;
+        padding: 0;
+    }
+    
+    .breadcrumb-item a {
+        color: #ff6b6b;
+        text-decoration: none;
+    }
+    
+    .order-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: 1px solid #eee;
+    }
+    
+    .order-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .order-items {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .order-item {
+        padding: 10px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .order-summary {
+        border-left: 4px solid #ff6b6b;
+    }
+    
+    .empty-orders-icon {
+        opacity: 0.5;
+    }
+    
+    .product-card-small {
+        padding: 15px;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        transition: all 0.3s;
+        text-align: center;
+    }
+    
+    .product-card-small:hover {
+        border-color: #ff6b6b;
+        background-color: rgba(255, 107, 107, 0.05);
+    }
+    
+    .product-image-small {
+        height: 80px;
+        overflow: hidden;
+    }
+    
+    .product-image-small img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .stat-item h4 {
+        color: #ff6b6b;
+    }
+    
+    .progress-bar {
+        border-radius: 5px;
+    }
+    
+    .list-group-item.active {
+        background-color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-outline-primary {
+        color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+    
+    .badge {
+        font-weight: 500;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Order search functionality
+    const orderSearch = document.getElementById('order-search');
+    const orderCards = document.querySelectorAll('.order-card');
+    
+    if (orderSearch) {
+        orderSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            orderCards.forEach(card => {
+                const orderNumber = card.querySelector('.card-header h6').textContent.toLowerCase();
+                const orderItems = card.querySelectorAll('.order-item h6');
+                let found = orderNumber.includes(searchTerm);
+                
+                if (!found) {
+                    orderItems.forEach(item => {
+                        if (item.textContent.toLowerCase().includes(searchTerm)) {
+                            found = true;
+                        }
+                    });
+                }
+                
+                card.style.display = found ? 'block' : 'none';
+            });
+        });
+    }
+    
+    // Time filter
+    document.getElementById('time-filter')?.addEventListener('change', function() {
+        const days = this.value;
+        if (days) {
+            window.location.href = `{% url 'orders' %}?days=${days}{% if status_filter %}&status={{ status_filter }}{% endif %}`;
+        }
+    });
+    
+    // Sort orders
+    document.getElementById('sort-orders')?.addEventListener('change', function() {
+        const sortBy = this.value;
+        window.location.href = `{% url 'orders' %}?sort=${sortBy}{% if status_filter %}&status={{ status_filter }}{% endif %}`;
+    });
+    
+    // Track order functionality
+    document.querySelectorAll('.track-order-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const orderId = this.getAttribute('data-order-id');
+            trackOrder(orderId);
+        });
+    });
+    
+    // Cancel order functionality
+    document.querySelectorAll('.cancel-order-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const orderId = this.getAttribute('data-order-id');
+            cancelOrder(orderId);
+        });
+    });
+    
+    // Export orders
+    document.getElementById('export-orders')?.addEventListener('click', function() {
+        exportOrders();
+    });
+    
+    // Reorder functionality
+    const reorderModal = document.getElementById('reorderModal');
+    if (reorderModal) {
+        reorderModal.addEventListener('show.bs.modal', function() {
+            loadReorderItems();
+        });
+    }
+    
+    // Add reorder to cart
+    document.getElementById('add-reorder-to-cart')?.addEventListener('click', function() {
+        addReorderToCart();
+    });
+    
+    // Helper functions
+    function trackOrder(orderId) {
+        fetch(`/track-order/${orderId}/`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('tracking-details').innerHTML = html;
+            const modal = new bootstrap.Modal(document.getElementById('trackOrderModal'));
+            modal.show();
+        });
+    }
+    
+    function cancelOrder(orderId) {
+        if (confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+            fetch(`/cancel-order/${orderId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Order cancelled successfully', 'success');
+                    // Reload page to update status
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(data.message || 'Failed to cancel order', 'error');
+                }
+            });
+        }
+    }
+    
+    function exportOrders() {
+        // Get order data
+        const orderData = [];
+        document.querySelectorAll('.order-card').forEach(card => {
+            const orderNumber = card.querySelector('.card-header h6').textContent.trim();
+            const date = card.querySelector('.card-header small').textContent.trim();
+            const status = card.querySelector('.badge').textContent.trim();
+            const amount = card.querySelector('.text-primary').textContent.trim();
+            
+            orderData.push({
+                orderNumber,
+                date,
+                status,
+                amount
+            });
+        });
+        
+        // Convert to CSV
+        const csv = convertToCSV(orderData);
+        
+        // Download file
+        downloadCSV(csv, `fashionnova-orders-${new Date().toISOString().split('T')[0]}.csv`);
+        
+        showToast('Orders exported successfully!', 'success');
+    }
+    
+    function loadReorderItems() {
+        fetch('/reorder-items/')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('reorder-items');
+            if (data.items && data.items.length > 0) {
+                let html = '';
+                data.items.forEach(item => {
+                    html += `
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input reorder-select" 
+                                   value="${item.product_id}" checked>
+                        </td>
+                        <td>
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 me-2">
+                                    <img src="${item.image}" alt="${item.name}" width="40">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0">${item.name}</h6>
+                                    <small class="text-muted">${item.category}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Ksh ${item.previous_price}</td>
+                        <td>
+                            <input type="number" class="form-control form-control-sm" 
+                                   value="${item.quantity}" min="1" style="width: 70px;">
+                        </td>
+                        <td>Ksh ${item.current_price}</td>
+                    </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } else {
+                tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-3">
+                        No previous items available for reorder
+                    </td>
+                </tr>
+                `;
+            }
+        });
+    }
+    
+    function addReorderToCart() {
+        const selectedItems = [];
+        document.querySelectorAll('.reorder-select:checked').forEach(checkbox => {
+            const row = checkbox.closest('tr');
+            const productId = checkbox.value;
+            const quantity = row.querySelector('input[type="number"]').value;
+            
+            selectedItems.push({
+                product_id: productId,
+                quantity: quantity
+            });
+        });
+        
+        if (selectedItems.length === 0) {
+            showToast('Please select items to add to cart', 'warning');
+            return;
+        }
+        
+        fetch('/add-reorder-to-cart/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ items: selectedItems })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(`${data.added_count} item(s) added to cart`, 'success');
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('reorderModal'));
+                modal.hide();
+                // Update cart count
+                if (data.cart_count) {
+                    updateCartCount(data.cart_count);
+                }
+            }
+        });
+    }
+    
+    function convertToCSV(data) {
+        const headers = ['Order Number', 'Date', 'Status', 'Amount'];
+        const rows = data.map(item => [item.orderNumber, item.date, item.status, item.amount]);
+        return [headers, ...rows].map(row => row.join(',')).join('\n');
+    }
+    
+    function downloadCSV(csv, filename) {
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+    
+    function showToast(message, type) {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        // Add to page
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        toastContainer.appendChild(toast);
+        
+        // Show toast
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove after hide
+        toast.addEventListener('hidden.bs.toast', function() {
+            toast.remove();
+        });
+    }
+    
+    function updateCartCount(count) {
+        const cartBadge = document.querySelector('.cart-count-badge');
+        if (cartBadge) {
+            cartBadge.textContent = count;
+            cartBadge.style.display = count > 0 ? 'inline' : 'none';
+        }
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}

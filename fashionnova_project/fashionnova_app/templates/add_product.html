@@ -1,0 +1,1141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Product - FashionNova Seller{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'seller_dashboard' %}">Seller Dashboard</a></li>
+                    <li class="breadcrumb-item active">Add Product</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-2">Add New Product</h1>
+                    <p class="text-muted mb-0">
+                        Fill in the details below to add a new product to your store
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Product Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Product Details</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data" id="product-form" 
+                          action="{% url 'add_product' %}">
+                        {% csrf_token %}
+                        
+                        <!-- Progress Steps -->
+                        <div class="steps mb-5">
+                            <div class="steps-progress">
+                                <div class="progress" style="height: 4px;">
+                                    <div class="progress-bar" id="form-progress" style="width: 0%"></div>
+                                </div>
+                                <div class="steps-list">
+                                    <div class="step active" data-step="1">
+                                        <div class="step-circle">1</div>
+                                        <div class="step-label">Basic Info</div>
+                                    </div>
+                                    <div class="step" data-step="2">
+                                        <div class="step-circle">2</div>
+                                        <div class="step-label">Pricing</div>
+                                    </div>
+                                    <div class="step" data-step="3">
+                                        <div class="step-circle">3</div>
+                                        <div class="step-label">Attributes</div>
+                                    </div>
+                                    <div class="step" data-step="4">
+                                        <div class="step-circle">4</div>
+                                        <div class="step-label">Images</div>
+                                    </div>
+                                    <div class="step" data-step="5">
+                                        <div class="step-circle">5</div>
+                                        <div class="step-label">SEO & Publish</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 1: Basic Information -->
+                        <div class="step-content active" id="step-1">
+                            <h5 class="mb-4"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_name" class="form-label">Product Name *</label>
+                                    <input type="text" class="form-control" id="id_name" 
+                                           name="name" required maxlength="200">
+                                    <div class="form-text">Keep it descriptive and clear</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_sku" class="form-label">SKU (Stock Keeping Unit)</label>
+                                    <input type="text" class="form-control" id="id_sku" 
+                                           name="sku" maxlength="100">
+                                    <div class="form-text">Unique identifier for your product</div>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label for="id_description" class="form-label">Description *</label>
+                                    <textarea class="form-control" id="id_description" 
+                                              name="description" rows="4" required></textarea>
+                                    <div class="form-text">
+                                        Describe your product in detail. Include materials, features, and care instructions.
+                                    </div>
+                                </div>
+                                
+
+<!-- Category dropdown  -->
+<div class="col-md-6 mb-3">
+    <label for="product-category" class="form-label">Category *</label>
+    <select class="form-select" id="product-category" name="category" required>
+        <option value="">Select Category</option>
+        <!-- Remove these hardcoded options or keep them if needed -->
+        <!-- 
+        <option value="W">Women</option>
+        <option value="M">Men</option>
+        <option value="K">Kids</option>
+        <option value="U">Unisex</option>
+        -->
+        {% for category in categories %}
+        <option value="{{ category.id }}">{{ category.name }}</option>
+        {% empty %}
+        <!-- If no categories exist, show default options -->
+        <option value="1">Women's Fashion</option>
+        <option value="2">Men's Fashion</option>
+        <option value="3">Kids' Fashion</option>
+        <option value="4">Unisex</option>
+        <option value="5">Accessories</option>
+        <option value="6">Footwear</option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- Brand dropdown - FIXED -->
+<div class="col-md-6 mb-3">
+    <label for="product-brand" class="form-label">Brand (Optional)</label>
+    <select class="form-select" id="product-brand" name="brand">
+        <option value="">Select Brand</option>
+        {% for brand in brands %}
+        <option value="{{ brand.id }}">{{ brand.name }}</option>
+        {% empty %}
+        <!-- If no brands exist, show default options -->
+        <option value="1">Nike</option>
+        <option value="2">Adidas</option>
+        <option value="3">Gucci</option>
+        <option value="4">Zara</option>
+        <option value="5">H&M</option>
+        <option value="6">FashionNova</option>
+        <option value="7">Puma</option>
+        <option value="8">Levi's</option>
+        <option value="9">Calvin Klein</option>
+        <option value="10">Tommy Hilfiger</option>
+        {% endfor %}
+    </select>
+</div>
+
+
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_gender" class="form-label">Gender</label>
+                                    <select class="form-select" id="id_gender" name="gender">
+                                        <option value="U">Unisex</option>
+                                        <option value="M">Men</option>
+                                        <option value="F">Women</option>
+                                        <option value="K">Kids</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_age_group" class="form-label">Age Group</label>
+                                    <select class="form-select" id="id_age_group" name="age_group">
+                                        <option value="">Select Age Group</option>
+                                        <option value="adult">Adult</option>
+                                        <option value="teen">Teen</option>
+                                        <option value="child">Child</option>
+                                        <option value="infant">Infant</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary" disabled>
+                                    Previous
+                                </button>
+                                <button type="button" class="btn btn-primary next-step" data-next="2">
+                                    Next: Pricing <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 2: Pricing & Inventory -->
+                        <div class="step-content" id="step-2">
+                            <h5 class="mb-4"><i class="fas fa-tags me-2"></i>Pricing & Inventory</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_price" class="form-label">Price (Ksh) *</label>
+                                    <input type="number" class="form-control" id="id_price" 
+                                           name="price" step="0.01" min="0" required>
+                                    <div class="form-text">Selling price</div>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_discount_price" class="form-label">Discount Price (Ksh)</label>
+                                    <input type="number" class="form-control" id="id_discount_price" 
+                                           name="discount_price" step="0.01" min="0">
+                                    <div class="form-text">Special offer price</div>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_cost_price" class="form-label">Cost Price (Ksh)</label>
+                                    <input type="number" class="form-control" id="id_cost_price" 
+                                           name="cost_price" step="0.01" min="0">
+                                    <div class="form-text">Your cost for this product</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_stock" class="form-label">Stock Quantity *</label>
+                                    <input type="number" class="form-control" id="id_stock" 
+                                           name="stock" min="0" required value="0">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_low_stock_threshold" class="form-label">Low Stock Alert</label>
+                                    <input type="number" class="form-control" id="id_low_stock_threshold" 
+                                           name="low_stock_threshold" min="1" value="10">
+                                    <div class="form-text">Get notified when stock reaches this level</div>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="id_track_inventory" name="track_inventory" checked>
+                                        <label class="form-check-label" for="id_track_inventory">
+                                            Track inventory for this product
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="id_allow_backorders" name="allow_backorders">
+                                        <label class="form-check-label" for="id_allow_backorders">
+                                            Allow customers to purchase when out of stock
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary prev-step" data-prev="1">
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <button type="button" class="btn btn-primary next-step" data-next="3">
+                                    Next: Attributes <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Product Attributes -->
+                        <div class="step-content" id="step-3">
+                            <h5 class="mb-4"><i class="fas fa-list-alt me-2"></i>Product Attributes</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_size" class="form-label">Available Sizes</label>
+                                    <input type="text" class="form-control" id="id_size" 
+                                           name="size" placeholder="S, M, L, XL">
+                                    <div class="form-text">Separate sizes with commas</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_color" class="form-label">Available Colors</label>
+                                    <input type="text" class="form-control" id="id_color" 
+                                           name="color" placeholder="Red, Blue, Black">
+                                    <div class="form-text">Separate colors with commas</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_material" class="form-label">Material</label>
+                                    <input type="text" class="form-control" id="id_material" 
+                                           name="material" placeholder="e.g., 100% Cotton">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_weight" class="form-label">Weight (kg)</label>
+                                    <input type="number" class="form-control" id="id_weight" 
+                                           name="weight" step="0.001" min="0" placeholder="0.5">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_dimensions" class="form-label">Dimensions (cm)</label>
+                                    <input type="text" class="form-control" id="id_dimensions" 
+                                           name="dimensions" placeholder="L x W x H">
+                                </div>
+                                
+                                <!-- Size Chart (Advanced) -->
+                                <div class="col-12 mb-4">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Size Chart (Optional)</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered" id="size-chart">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Size</th>
+                                                            <th>Chest (cm)</th>
+                                                            <th>Waist (cm)</th>
+                                                            <th>Length (cm)</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><input type="text" class="form-control" name="size_chart[]" placeholder="S"></td>
+                                                            <td><input type="number" class="form-control" name="chest[]" placeholder="90"></td>
+                                                            <td><input type="number" class="form-control" name="waist[]" placeholder="80"></td>
+                                                            <td><input type="number" class="form-control" name="length[]" placeholder="70"></td>
+                                                            <td>
+                                                                <button type="button" class="btn btn-sm btn-danger remove-size-row">
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" id="add-size-row">
+                                                <i class="fas fa-plus me-1"></i>Add Size
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary prev-step" data-prev="2">
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <button type="button" class="btn btn-primary next-step" data-next="4">
+                                    Next: Images <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 4: Product Images -->
+                        <div class="step-content" id="step-4">
+                            <h5 class="mb-4"><i class="fas fa-images me-2"></i>Product Images</h5>
+                            
+                            <div class="row">
+                                <!-- Main Image -->
+                                <div class="col-12 mb-4">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Main Product Image *</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="main-image-upload">
+                                                <div class="upload-area text-center p-5 border rounded" 
+                                                     id="main-upload-area">
+                                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                                    <h5>Drag & Drop or Click to Upload</h5>
+                                                    <p class="text-muted mb-3">
+                                                        Upload the main product image (Recommended: 800x800px)
+                                                    </p>
+                                                    <button type="button" class="btn btn-primary" 
+                                                            onclick="document.getElementById('id_main_image').click()">
+                                                        <i class="fas fa-upload me-2"></i>Select Image
+                                                    </button>
+                                                    <input type="file" class="d-none" id="id_main_image" 
+                                                           name="main_image" accept="image/*" required>
+                                                </div>
+                                                <div class="image-preview mt-3 d-none" id="main-image-preview">
+                                                    <img src="" alt="Preview" class="img-fluid rounded" 
+                                                         style="max-height: 200px;">
+                                                    <button type="button" class="btn btn-sm btn-danger mt-2" 
+                                                            id="remove-main-image">
+                                                        <i class="fas fa-trash me-1"></i>Remove
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Gallery Images -->
+                                <div class="col-12 mb-4">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Gallery Images (Optional)</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="gallery-upload">
+                                                <div class="upload-area text-center p-5 border rounded" 
+                                                     id="gallery-upload-area">
+                                                    <i class="fas fa-images fa-3x text-muted mb-3"></i>
+                                                    <h5>Add More Product Images</h5>
+                                                    <p class="text-muted mb-3">
+                                                        Upload additional images (Max 5 images)
+                                                    </p>
+                                                    <button type="button" class="btn btn-outline-primary" 
+                                                            onclick="document.getElementById('id_gallery_images').click()">
+                                                        <i class="fas fa-plus me-2"></i>Add Images
+                                                    </button>
+                                                    <input type="file" class="d-none" id="id_gallery_images" 
+                                                           name="gallery_images" accept="image/*" multiple>
+                                                </div>
+                                                <div class="gallery-preview mt-3 row g-2" id="gallery-preview">
+                                                    <!-- Gallery previews will be added here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Image Guidelines -->
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <h6><i class="fas fa-lightbulb me-2"></i>Image Guidelines</h6>
+                                        <ul class="mb-0">
+                                            <li>Use high-quality images with good lighting</li>
+                                            <li>Show product from multiple angles</li>
+                                            <li>Include close-ups of details and materials</li>
+                                            <li>Use plain, neutral backgrounds</li>
+                                            <li>Recommended format: JPEG or PNG</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary prev-step" data-prev="3">
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <button type="button" class="btn btn-primary next-step" data-next="5">
+                                    Next: SEO & Publish <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 5: SEO & Publish -->
+                        <div class="step-content" id="step-5">
+                            <h5 class="mb-4"><i class="fas fa-search me-2"></i>SEO & Publish Settings</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_meta_title" class="form-label">Meta Title</label>
+                                    <input type="text" class="form-control" id="id_meta_title" 
+                                           name="meta_title" maxlength="60">
+                                    <div class="form-text">
+                                        <span id="title-count">0</span>/60 characters
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_meta_keywords" class="form-label">Meta Keywords</label>
+                                    <input type="text" class="form-control" id="id_meta_keywords" 
+                                           name="meta_keywords" placeholder="fashion, clothing, style">
+                                    <div class="form-text">Separate keywords with commas</div>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label for="id_meta_description" class="form-label">Meta Description</label>
+                                    <textarea class="form-control" id="id_meta_description" 
+                                              name="meta_description" rows="3" maxlength="160"></textarea>
+                                    <div class="form-text">
+                                        <span id="description-count">0</span>/160 characters
+                                    </div>
+                                </div>
+                                
+                                <!-- Publish Settings -->
+                                <div class="col-12 mb-4">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Publish Settings</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" 
+                                                               id="id_is_active" name="is_active" checked>
+                                                        <label class="form-check-label" for="id_is_active">
+                                                            Publish product immediately
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" 
+                                                               id="id_is_featured" name="is_featured">
+                                                        <label class="form-check-label" for="id_is_featured">
+                                                            Mark as featured product
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" 
+                                                               id="id_is_new" name="is_new" checked>
+                                                        <label class="form-check-label" for="id_is_new">
+                                                            Mark as new arrival
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" 
+                                                               id="id_is_best_seller" name="is_best_seller">
+                                                        <label class="form-check-label" for="id_is_best_seller">
+                                                            Mark as best seller
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Product Tags -->
+                                <div class="col-12 mb-4">
+                                    <label class="form-label">Product Tags</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="tag-input" 
+                                               placeholder="Add tags (press Enter)">
+                                        <button class="btn btn-outline-secondary" type="button" id="add-tag">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Add relevant tags to help customers find your product</div>
+                                    <div class="tags-container mt-2 d-flex flex-wrap gap-2" id="tags-container">
+                                        <!-- Tags will be added here -->
+                                    </div>
+                                    <input type="hidden" name="tags" id="tags-input">
+                                </div>
+                            </div>
+                            
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-between mt-4 pt-4 border-top">
+                                <button type="button" class="btn btn-outline-secondary prev-step" data-prev="4">
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <div>
+                                    <button type="button" class="btn btn-outline-primary me-2" id="save-draft">
+                                        <i class="fas fa-save me-2"></i>Save as Draft
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check me-2"></i>Publish Product
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Form Guidelines -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6><i class="fas fa-question-circle me-2"></i>Guidelines for Sellers</h6>
+                    <ul class="mb-0">
+                        <li>Provide accurate and detailed product information</li>
+                        <li>Use high-quality images that represent the product accurately</li>
+                        <li>Set competitive prices based on market research</li>
+                        <li>Ensure proper sizing information is provided</li>
+                        <li>Keep inventory updated to avoid overselling</li>
+                        <li>Respond to customer inquiries promptly</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .breadcrumb {
+        background: none;
+        padding: 0;
+    }
+    
+    .breadcrumb-item a {
+        color: #ff6b6b;
+        text-decoration: none;
+    }
+    
+    .steps-progress {
+        position: relative;
+        padding: 20px 0 40px;
+    }
+    
+    .steps-list {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .step {
+        text-align: center;
+        position: relative;
+        flex: 1;
+    }
+    
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        font-weight: bold;
+        border: 3px solid white;
+        transition: all 0.3s;
+    }
+    
+    .step.active .step-circle {
+        background: #ff6b6b;
+        color: white;
+        border-color: #ff6b6b;
+    }
+    
+    .step-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .step.active .step-label {
+        color: #ff6b6b;
+        font-weight: 500;
+    }
+    
+    .progress {
+        position: absolute;
+        top: 30px;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #e9ecef;
+    }
+    
+    .progress-bar {
+        background: #ff6b6b;
+        transition: width 0.3s;
+    }
+    
+    .step-content {
+        display: none;
+        animation: fadeIn 0.5s;
+    }
+    
+    .step-content.active {
+        display: block;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .upload-area {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .upload-area:hover {
+        border-color: #ff6b6b;
+        background: rgba(255, 107, 107, 0.05);
+    }
+    
+    .gallery-preview .image-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+    }
+    
+    .gallery-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    .gallery-preview .remove-image {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.5);
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+    
+    .tags-container .tag {
+        background: #e9ecef;
+        padding: 4px 12px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .tag .remove-tag {
+        background: none;
+        border: none;
+        color: #6c757d;
+        font-size: 12px;
+        padding: 0;
+        width: 16px;
+        height: 16px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+    }
+    
+    .form-check-input:checked {
+        background-color: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+    
+    .alert-info {
+        border-left: 4px solid #17a2b8;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Step navigation
+    const steps = document.querySelectorAll('.step');
+    const stepContents = document.querySelectorAll('.step-content');
+    const nextButtons = document.querySelectorAll('.next-step');
+    const prevButtons = document.querySelectorAll('.prev-step');
+    const progressBar = document.getElementById('form-progress');
+    
+    // Initialize first step
+    updateStep(1);
+    
+    // Next button click
+    nextButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const currentStep = parseInt(this.closest('.step-content').id.split('-')[1]);
+            const nextStep = parseInt(this.getAttribute('data-next'));
+            
+            // Validate current step before proceeding
+            if (validateStep(currentStep)) {
+                updateStep(nextStep);
+            }
+        });
+    });
+    
+    // Previous button click
+    prevButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const prevStep = parseInt(this.getAttribute('data-prev'));
+            updateStep(prevStep);
+        });
+    });
+    
+    // Step click
+    steps.forEach(step => {
+        step.addEventListener('click', function() {
+            const stepNumber = parseInt(this.getAttribute('data-step'));
+            updateStep(stepNumber);
+        });
+    });
+    
+    function updateStep(stepNumber) {
+        // Update steps
+        steps.forEach(step => {
+            const stepNum = parseInt(step.getAttribute('data-step'));
+            if (stepNum <= stepNumber) {
+                step.classList.add('active');
+            } else {
+                step.classList.remove('active');
+            }
+        });
+        
+        // Update progress bar
+        const progressPercentage = ((stepNumber - 1) / (steps.length - 1)) * 100;
+        progressBar.style.width = `${progressPercentage}%`;
+        
+        // Update step contents
+        stepContents.forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(`step-${stepNumber}`).classList.add('active');
+        
+        // Scroll to top of form
+        document.querySelector('.step-content.active').scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+    
+    function validateStep(stepNumber) {
+        const stepContent = document.getElementById(`step-${stepNumber}`);
+        const requiredFields = stepContent.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+                
+                // Add error message
+                if (!field.nextElementSibling?.classList.contains('invalid-feedback')) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.textContent = 'This field is required';
+                    field.parentNode.insertBefore(errorDiv, field.nextSibling);
+                }
+            } else {
+                field.classList.remove('is-invalid');
+                const errorDiv = field.nextElementSibling;
+                if (errorDiv?.classList.contains('invalid-feedback')) {
+                    errorDiv.remove();
+                }
+            }
+        });
+        
+        // Specific validation for step 2 (price)
+        if (stepNumber === 2) {
+            const priceInput = document.getElementById('id_price');
+            const discountInput = document.getElementById('id_discount_price');
+            
+            if (priceInput.value && parseFloat(priceInput.value) <= 0) {
+                priceInput.classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            if (discountInput.value && parseFloat(discountInput.value) >= parseFloat(priceInput.value)) {
+                discountInput.classList.add('is-invalid');
+                isValid = false;
+            }
+        }
+        
+        if (!isValid) {
+            showToast('Please fill in all required fields correctly', 'warning');
+        }
+        
+        return isValid;
+    }
+    
+    // Image upload functionality
+    const mainUploadArea = document.getElementById('main-upload-area');
+    const mainImageInput = document.getElementById('id_main_image');
+    const mainImagePreview = document.getElementById('main-image-preview');
+    const mainPreviewImage = mainImagePreview.querySelector('img');
+    
+    // Main image upload
+    mainUploadArea.addEventListener('click', () => mainImageInput.click());
+    mainUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        mainUploadArea.style.borderColor = '#ff6b6b';
+        mainUploadArea.style.background = 'rgba(255, 107, 107, 0.1)';
+    });
+    mainUploadArea.addEventListener('dragleave', () => {
+        mainUploadArea.style.borderColor = '#dee2e6';
+        mainUploadArea.style.background = '#f8f9fa';
+    });
+    mainUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        mainUploadArea.style.borderColor = '#dee2e6';
+        mainUploadArea.style.background = '#f8f9fa';
+        
+        if (e.dataTransfer.files.length) {
+            handleMainImageUpload(e.dataTransfer.files[0]);
+        }
+    });
+    
+    mainImageInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleMainImageUpload(e.target.files[0]);
+        }
+    });
+    
+    function handleMainImageUpload(file) {
+        if (!file.type.startsWith('image/')) {
+            showToast('Please upload an image file', 'error');
+            return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            showToast('Image size should be less than 5MB', 'error');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            mainPreviewImage.src = e.target.result;
+            mainImagePreview.classList.remove('d-none');
+            mainUploadArea.classList.add('d-none');
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    // Remove main image
+    document.getElementById('remove-main-image').addEventListener('click', () => {
+        mainImagePreview.classList.add('d-none');
+        mainUploadArea.classList.remove('d-none');
+        mainImageInput.value = '';
+        mainPreviewImage.src = '';
+    });
+    
+    // Gallery images upload
+    const galleryUploadArea = document.getElementById('gallery-upload-area');
+    const galleryImagesInput = document.getElementById('id_gallery_images');
+    const galleryPreview = document.getElementById('gallery-preview');
+    const maxGalleryImages = 5;
+    
+    galleryUploadArea.addEventListener('click', () => galleryImagesInput.click());
+    
+    galleryImagesInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        const currentCount = galleryPreview.children.length;
+        
+        if (currentCount + files.length > maxGalleryImages) {
+            showToast(`Maximum ${maxGalleryImages} images allowed`, 'error');
+            return;
+        }
+        
+        files.forEach(file => {
+            if (!file.type.startsWith('image/')) {
+                showToast('Please upload image files only', 'error');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Image size should be less than 5MB', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'col-3 col-md-2';
+                imageItem.innerHTML = `
+                    <div class="image-item">
+                        <img src="${e.target.result}" alt="Gallery Image">
+                        <button type="button" class="btn btn-sm remove-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                galleryPreview.appendChild(imageItem);
+                
+                // Add remove functionality
+                imageItem.querySelector('.remove-image').addEventListener('click', () => {
+                    imageItem.remove();
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+    
+    // Size chart functionality
+    const sizeChart = document.getElementById('size-chart');
+    const addSizeRowBtn = document.getElementById('add-size-row');
+    
+    addSizeRowBtn.addEventListener('click', () => {
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td><input type="text" class="form-control" name="size_chart[]" placeholder="S"></td>
+            <td><input type="number" class="form-control" name="chest[]" placeholder="90"></td>
+            <td><input type="number" class="form-control" name="waist[]" placeholder="80"></td>
+            <td><input type="number" class="form-control" name="length[]" placeholder="70"></td>
+            <td>
+                <button type="button" class="btn btn-sm btn-danger remove-size-row">
+                    <i class="fas fa-times"></i>
+                </button>
+            </td>
+        `;
+        
+        sizeChart.querySelector('tbody').appendChild(newRow);
+        
+        // Add remove functionality
+        newRow.querySelector('.remove-size-row').addEventListener('click', () => {
+            newRow.remove();
+        });
+    });
+    
+    // Add remove functionality to existing rows
+    document.querySelectorAll('.remove-size-row').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('tr').remove();
+        });
+    });
+    
+    // Tag functionality
+    const tagInput = document.getElementById('tag-input');
+    const addTagBtn = document.getElementById('add-tag');
+    const tagsContainer = document.getElementById('tags-container');
+    const tagsInput = document.getElementById('tags-input');
+    const tags = [];
+    
+    function addTag(tagText) {
+        const tag = tagText.trim().toLowerCase();
+        if (tag && !tags.includes(tag)) {
+            tags.push(tag);
+            updateTagsDisplay();
+        }
+        tagInput.value = '';
+    }
+    
+    function updateTagsDisplay() {
+        tagsContainer.innerHTML = '';
+        tags.forEach(tag => {
+            const tagElement = document.createElement('span');
+            tagElement.className = 'tag';
+            tagElement.innerHTML = `
+                ${tag}
+                <button type="button" class="remove-tag" data-tag="${tag}">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            tagsContainer.appendChild(tagElement);
+        });
+        tagsInput.value = tags.join(',');
+    }
+    
+    addTagBtn.addEventListener('click', () => addTag(tagInput.value));
+    
+    tagInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addTag(tagInput.value);
+        }
+    });
+    
+    // Remove tag
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.remove-tag')) {
+            const tag = e.target.closest('.remove-tag').getAttribute('data-tag');
+            const index = tags.indexOf(tag);
+            if (index > -1) {
+                tags.splice(index, 1);
+                updateTagsDisplay();
+            }
+        }
+    });
+    
+    // Character counters
+    const metaTitle = document.getElementById('id_meta_title');
+    const metaDescription = document.getElementById('id_meta_description');
+    const titleCount = document.getElementById('title-count');
+    const descriptionCount = document.getElementById('description-count');
+    
+    metaTitle.addEventListener('input', () => {
+        titleCount.textContent = metaTitle.value.length;
+    });
+    
+    metaDescription.addEventListener('input', () => {
+        descriptionCount.textContent = metaDescription.value.length;
+    });
+    
+    // Save draft
+    document.getElementById('save-draft').addEventListener('click', function() {
+        // Mark form as draft
+        const draftInput = document.createElement('input');
+        draftInput.type = 'hidden';
+        draftInput.name = 'is_draft';
+        draftInput.value = 'true';
+        document.getElementById('product-form').appendChild(draftInput);
+        
+        // Submit form
+        document.getElementById('product-form').submit();
+    });
+    
+    // Form submission
+    document.getElementById('product-form').addEventListener('submit', function(e) {
+        if (!validateStep(5)) {
+            e.preventDefault();
+            showToast('Please complete all required fields', 'warning');
+        }
+    });
+    
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'warning'} border-0`;
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" 
+                        data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(container);
+        }
+        container.appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        toast.addEventListener('hidden.bs.toast', function() {
+            toast.remove();
+        });
+    }
+});
+</script>
+{% endblock %}
