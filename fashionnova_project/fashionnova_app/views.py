@@ -17,6 +17,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Sum, Count, Avg, Q
 from datetime import datetime, timedelta
 from django.utils import timezone  
+from users.models import SellerProfile
 
 
 def home(request):
@@ -339,19 +340,52 @@ def seller_dashboard(request):
 
 @login_required
 def add_product(request):
+
+
     """View to add new product - connects to products.html"""
     if request.method == 'POST':
-        form = ProductForm()
+        product = request.POST.get('product')
+    
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        price = request.POST.get('price')
+        discount_price = request.POST.get('discount_price')
+        gender = request.POST.get('gender')
+        image = request.POST.get('main_image')
+        stock = request.POST.get('stock', 0)
+        category_id = request.POST.get('category')
+        category = None
+        brand_id = request.POST.get('brand')
+        brand = None
+        if 'main_image' in request.FILES:
+                image = request.FILES['main_image']
+                #image.save()
+            
+            # If no category selected, create a default one
+        if not category:
+                category, created = Category.objects.get_or_create(
+                    name='General',
+                    defaults={'is_active': True}
+                )
+        seller = SellerProfile.objects.get(user=request.user.id)
+
+        product = Product(name=name, seller=seller, description=description, price=price, discount_price=discount_price, category=category, brand=brand, gender=gender, image=image, stock=stock )
+        product.save()
+        '''form = ProductForm(request.POST)
+        print(request.POST)
         if form.is_valid():
+            print("=====")
             form.save()
             messages.success(request, 'product added successfully')
             return redirect('products')
         else:
+            print("*****")
            
-            messages.error(request, 'product did not add successfully')
+            messages.error(request, 'product did not add successfully')'''
     else:
-        form = ProductForm()
-    return render (request, 'add_product.html', {'form':form})
+        #form = ProductForm()
+        print('========')
+    return render (request, 'add_product.html')
     '''if request.method == 'POST':
         try:
             # Get form data
