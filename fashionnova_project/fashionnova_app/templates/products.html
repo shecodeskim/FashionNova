@@ -4,6 +4,18 @@
 {% block title %}Products - FashionNova{% endblock %}
 
 {% block content %}
+
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 <div class="row">
     <!-- Sidebar Filters -->
     <div class="col-md-3">
@@ -214,10 +226,10 @@
                             {% if product.image %}
                                 <img src="{{ product.image.url }}" 
                                      class="card-img-top product-image" 
-                                     alt="{{ product.name }}"
+                                     alt="{{ product.name}}"
                                      onerror="this.onerror=null; this.src='{% static 'images/products/default-product.jpg' %}'">
                             {% else %}
-                                <img src="{% static 'fashionnova_project\fashionnova_app\templates\Images\Cloth1F.jpeg' %}" 
+                                <img src="{% static 'fashionnova_app/images/momj.jpeg' %}" 
                                      class="card-img-top product-image" 
                                      alt="{{ product.name }}">
                             {% endif %}
@@ -286,13 +298,13 @@
                             
                             <!-- Action Buttons -->
                             <div class="btn-group" role="group">
-                                {% if user.is_authenticated %}
+                                <!--{% if user.is_authenticated %}
                                 <a href="{% url 'add_to_wishlist' product.id %}" 
                                    class="btn btn-sm btn-outline-danger wishlist-btn {% if product in user.wishlist.all %}active{% endif %}"
                                    title="Add to Wishlist">
                                     <i class="{% if product in user.wishlist.all %}fas{% else %}far{% endif %} fa-heart"></i>
-                                </a>
-                                {% endif %}
+                                </a> 
+                                {% endif %}-->
                                 <a href="{% url 'add_to_cart' product.id %}" 
                                    class="btn btn-sm btn-primary"
                                    title="Add to Cart">
@@ -302,8 +314,8 @@
                         </div>
                         
                         <!-- Stock Status -->
-                        <div class="mt-2">
-                            {% if product.stock_quantity > 0 %}
+                       <!-- <div class="mt-2">
+                            {% if product.stock_quantity > 20 %}
                                 {% if product.stock_quantity <= product.low_stock_threshold %}
                                 <small class="text-warning">
                                     <i class="fas fa-exclamation-triangle"></i> Only {{ product.stock_quantity }} left!
@@ -318,11 +330,15 @@
                                     <i class="fas fa-times-circle"></i> Out of Stock
                                 </small>
                             {% endif %}
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
             {% empty %}
+
+            <a href="{% url 'add_product' %}" class="btn btn-primary mb-3">
+    <i class="fas fa-plus"></i> Add Product
+</a>
             <div class="col-12">
                 <div class="text-center py-5">
                     <i class="fas fa-search fa-3x text-muted mb-3"></i>
@@ -370,6 +386,7 @@
         {% endif %}
     </div>
 </div>
+
 
 <style>
     .product-card {

@@ -435,110 +435,12 @@
                                     <i class="fas fa-arrow-left me-2"></i>Previous
                                 </button>
                                 <button type="button" class="btn btn-primary next-step" data-next="5">
-                                    Next: SEO & Publish <i class="fas fa-arrow-right ms-2"></i>
+                                    Next: Add Product <i class="fas fa-arrow-right ms-2"></i>
                                 </button>
                             </div>
                         </div>
                         
-                        <!-- Step 5: SEO & Publish -->
-                        <div class="step-content" id="step-5">
-                            <h5 class="mb-4"><i class="fas fa-search me-2"></i>SEO & Publish Settings</h5>
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_meta_title" class="form-label">Meta Title</label>
-                                    <input type="text" class="form-control" id="id_meta_title" 
-                                           name="meta_title" maxlength="60">
-                                    <div class="form-text">
-                                        <span id="title-count">0</span>/60 characters
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_meta_keywords" class="form-label">Meta Keywords</label>
-                                    <input type="text" class="form-control" id="id_meta_keywords" 
-                                           name="meta_keywords" placeholder="fashion, clothing, style">
-                                    <div class="form-text">Separate keywords with commas</div>
-                                </div>
-                                
-                                <div class="col-12 mb-3">
-                                    <label for="id_meta_description" class="form-label">Meta Description</label>
-                                    <textarea class="form-control" id="id_meta_description" 
-                                              name="meta_description" rows="3" maxlength="160"></textarea>
-                                    <div class="form-text">
-                                        <span id="description-count">0</span>/160 characters
-                                    </div>
-                                </div>
-                                
-                                <!-- Publish Settings -->
-                                <div class="col-12 mb-4">
-                                    <div class="card">
-                                        <div class="card-header bg-light">
-                                            <h6 class="mb-0">Publish Settings</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" 
-                                                               id="id_is_active" name="is_active" checked>
-                                                        <label class="form-check-label" for="id_is_active">
-                                                            Publish product immediately
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" 
-                                                               id="id_is_featured" name="is_featured">
-                                                        <label class="form-check-label" for="id_is_featured">
-                                                            Mark as featured product
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" 
-                                                               id="id_is_new" name="is_new" checked>
-                                                        <label class="form-check-label" for="id_is_new">
-                                                            Mark as new arrival
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" 
-                                                               id="id_is_best_seller" name="is_best_seller">
-                                                        <label class="form-check-label" for="id_is_best_seller">
-                                                            Mark as best seller
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Product Tags -->
-                                <div class="col-12 mb-4">
-                                    <label class="form-label">Product Tags</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="tag-input" 
-                                               placeholder="Add tags (press Enter)">
-                                        <button class="btn btn-outline-secondary" type="button" id="add-tag">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                    <div class="form-text">Add relevant tags to help customers find your product</div>
-                                    <div class="tags-container mt-2 d-flex flex-wrap gap-2" id="tags-container">
-                                        <!-- Tags will be added here -->
-                                    </div>
-                                    <input type="hidden" name="tags" id="tags-input">
-                                </div>
-                            </div>
+                        
                             
                             <!-- Form Actions -->
                             <div class="d-flex justify-content-between mt-4 pt-4 border-top">
@@ -550,11 +452,27 @@
                                         <i class="fas fa-save me-2"></i>Save as Draft
                                     </button>
                                     <button type="submit" class="btn btn-success">
-                                        <i class="fas fa-check me-2"></i>Publish Product
+                                        <i class="fas fa-check me-2"></i>+ Add Product
                                     </button>
                                 </div>
+                         
+
+                                <div class="mt-4 text-center">
+                        <a href="{% url 'products' %}" class="btn btn-outline-secondary">
+                            View All Products
+                        </a>
+                    </div>
                             </div>
                         </div>
+                        <div class="mt-4 alert alert-info">
+                <h5>How it works:</h5>
+                <ol class="mb-0">
+                    <li>Fill out the form above</li>
+                    <li>Click "Publish Product"</li>
+                    <li>You'll be redirected to the Products page</li>
+                    <li>Your new product will appear immediately</li>
+                </ol>
+            </div>
                     </form>
                 </div>
             </div>

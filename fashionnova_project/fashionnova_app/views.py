@@ -16,8 +16,7 @@ from .forms import *
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Sum, Count, Avg, Q
 from datetime import datetime, timedelta
-
-
+from django.utils import timezone  
 
 
 def home(request):
@@ -202,7 +201,7 @@ def checkout(request):
             # Create order
             order = Order.objects.create(
                 user=request.user,
-                order_number=f"ORD-{request.user.id}-{int(time.time())}",
+                order_number = f"ORD-{request.user.id}-{int(timezone.now().timestamp())}",
                 shipping_address=form.cleaned_data['shipping_address'],
                 phone=form.cleaned_data['phone'],
                 payment_method=form.cleaned_data['payment_method'],
@@ -340,29 +339,166 @@ def seller_dashboard(request):
 
 @login_required
 def add_product(request):
-    if request.user.user_type != 'seller':
-        messages.error(request, 'Access denied!')
-        return redirect('home')
-    
-    try:
-        seller_profile = SellerProfile.objects.get(user=request.user)
-        
-        if request.method == 'POST':
-            form = ProductForm(request.POST, request.FILES)
-            if form.is_valid():
-                product = form.save(commit=False)
-                product.seller = seller_profile
-                product.save()
-                messages.success(request, 'Product added successfully!')
-                return redirect('seller_dashboard')
+    """View to add new product - connects to products.html"""
+    if request.method == 'POST':
+        form = ProductForm()
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'product added successfully')
+            return redirect('products')
         else:
-            form = ProductForm()
-        
-        return render(request, 'add_product.html', {'form': form})
-    except SellerProfile.DoesNotExist:
-        messages.error(request, 'Seller profile not found!')
-        return redirect('home')
+           
+            messages.error(request, 'product did not add successfully')
+    else:
+        form = ProductForm()
+    return render (request, 'add_product.html', {'form':form})
+    '''if request.method == 'POST':
+        try:
+            # Get form data
+            name = request.POST.get('name')
+            description = request.POST.get('description')
+            price = request.POST.get('price')
+            stock = request.POST.get('stock', 0)
+            
+            # Handle category
+            category_id = request.POST.get('category')
+            category = None
+            if category_id and category_id.isdigit():
+                try:
+                    category = Category.objects.get(id=int(category_id))
+                except Category.DoesNotExist:
+                    pass
+            
+            # If no category selected, create a default one
+            if not category:
+                category, created = Category.objects.get_or_create(
+                    name='General',
+                    defaults={'is_active': True}
+                )
+            
+            # Handle brand
+            brand_id = request.POST.get('brand')
+            brand = None
+            if brand_id and brand_id.isdigit():
+                try:
+                    brand = Brand.objects.get(id=int(brand_id))
+                except Brand.DoesNotExist:
+                    pass
+            
+            # Create product
+            product = Product.objects.create(
+                seller=request.user,
+                name=name,
+                description=description,
+                category=category,
+                brand=brand,
+                price=price,
+                discount_price=request.POST.get('discount_price') or None,
+                stock=stock,
+                gender=request.POST.get('gender', 'U'),
+                is_active=request.POST.get('is_active') == 'on',
+                is_featured=request.POST.get('is_featured') == 'on',
+                is_new=request.POST.get('is_new') == 'on',
+                low_stock_threshold=request.POST.get('low_stock_threshold', 10),
+            )
+            
+            # Handle image upload
+            if 'main_image' in request.FILES:
+                product.image = request.FILES['main_image']
+                product.save()
+            
+            messages.success(request, f'Product "{name}" has been published successfully!')
+            
+            # Redirect to products page where the new product will be visible
+            return redirect('products')
+            
+        except Exception as e:
+            messages.error(request, f'Error creating product: {str(e)}')
+            return redirect('add_product')
+    
+    # GET request - show form
+    # Get existing categories and brands for dropdowns
+    categories = Category.objects.filter(is_active=True).order_by('name')
+    brands = Brand.objects.filter(is_active=True).order_by('name')
+    
+    return render(request, 'add_product.html', {
+        'categories': categories,
+        'brands': brands,
+    })'''
 
+def products_view(request):
+    """View to display all products - shows published products"""
+    # Get all active products (including newly published ones)
+    products_list = Product.objects.filter(is_active=True).order_by('-created_at')
+    
+    # Apply filters
+    category_id = request.GET.get('category')
+    if category_id:
+        products_list = products_list.filter(category_id=category_id)
+    
+    brand_id = request.GET.get('brand')
+    if brand_id:
+        products_list = products_list.filter(brand_id=brand_id)
+    
+    gender = request.GET.get('gender')
+    if gender:
+        products_list = products_list.filter(gender=gender)
+    
+    # Price filter
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    if min_price:
+        products_list = products_list.filter(price__gte=min_price)
+    if max_price:
+        products_list = products_list.filter(price__lte=max_price)
+    
+    # Discount filter
+    if request.GET.get('discount_only'):
+        products_list = products_list.filter(discount_price__isnull=False)
+    
+    # Sorting
+    sort_by = request.GET.get('sort', 'newest')
+    if sort_by == 'price_low':
+        products_list = products_list.order_by('price')
+    elif sort_by == 'price_high':
+        products_list = products_list.order_by('-price')
+    elif sort_by == 'discount':
+        products_list = products_list.filter(discount_price__isnull=False).order_by('-discount_price')
+    elif sort_by == 'rating':
+        products_list = products_list.order_by('-average_rating')
+    else:  # newest
+        products_list = products_list.order_by('-created_at')
+    
+    # Get categories and brands for filters
+    categories = Category.objects.filter(is_active=True).order_by('name')
+    brands = Brand.objects.filter(is_active=True).order_by('name')
+    
+    # Count products per category
+    for category in categories:
+        category.product_count = Product.objects.filter(category=category, is_active=True).count()
+    
+    # Selected category for breadcrumb
+    selected_category = None
+    if category_id:
+        try:
+            selected_category = Category.objects.get(id=category_id)
+        except Category.DoesNotExist:
+            pass
+    
+    # Pagination
+    paginator = Paginator(products_list, 12)  # 12 products per page
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
+    
+    context = {
+        'products': products,
+        'categories': categories,
+        'brands': brands,
+        'selected_category': selected_category,
+        'sort': sort_by,
+    }
+    
+    return render(request, 'products.html', context)
 def categories(request):
     categories_list = Category.objects.all()
     return render(request, 'categories.html', {'categories': categories_list})

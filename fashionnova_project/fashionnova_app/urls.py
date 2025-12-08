@@ -44,6 +44,10 @@ urlpatterns = [
     path('seller/dashboard/', views.seller_dashboard, name='seller_dashboard'),
     path('seller/add-product/', views.add_product, name='add_product'),
     path('seller/orders/', views.seller_orders_view, name='seller_orders'),
+    path('seller/add-product/', views.add_product_view, name='add_product'),
+     path('seller/update-products-status/', views.update_products_status_view, name='update_products_status'),
+    path('seller/delete-products/', views.delete_products_view, name='delete_products'),
+    path('products/', views.products_view, name='products'),
 
     # M-Pesa URLs
     path('process-mpesa/<int:order_id>/', views.process_mpesa_payment, name='process_mpesa_payment'),

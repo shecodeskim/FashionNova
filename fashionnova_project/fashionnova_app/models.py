@@ -4,35 +4,57 @@ from django.contrib.auth import get_user_model
 from decimal import Decimal
 import time
 from users.models import SellerProfile  # Import SellerProfile from users app
+from django.utils.text import slugify
 
 User = get_user_model()
 
 class Category(models.Model):
-    name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
+    GENDER_CHOICES = [
+        ('U', 'Unisex'),
+        ('M', 'Men'),
+        ('F', 'Women'),
+        ('K', 'Kids'),
+    ]
+    
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='categories/', blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='U')
+    image = models.ImageField(upload_to='categories/', blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.name
     
     class Meta:
         verbose_name_plural = "Categories"
+        ordering = ['name']
+
+class Brand(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    description = models.TextField(blank=True)
+    logo = models.ImageField(upload_to='brands/', blank=True, null=True)
+    website = models.URLField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return self.name
 
-class Brand(models.Model):
-    name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True)
-    description = models.TextField(blank=True, null=True)
-    logo = models.ImageField(upload_to='brands/logos/', blank=True, null=True)
-    is_active = models.BooleanField(default=True)  # Add this line
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return self.name
-    
-    class Meta:
-        ordering = ['name']
 
 class Product(models.Model):
     GENDER_CHOICES = (
@@ -48,11 +70,11 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, null=True, blank=True)
+    category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, related_name='products')
+    brand = models.ForeignKey('Brand', on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='U')
     stock = models.IntegerField(default=0)
-    image = models.ImageField(upload_to='products/')
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
@@ -65,8 +87,16 @@ class Product(models.Model):
     def get_final_price(self):
         return self.discount_price if self.discount_price else self.price
     
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            import uuid
+            self.slug = f"{slugify(self.name)}-{uuid.uuid4().hex[:8]}"
+        super().save(*args, **kwargs)
+    
     def __str__(self):
         return self.name
+    
+
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')

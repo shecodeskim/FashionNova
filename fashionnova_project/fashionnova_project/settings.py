@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'users',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_daraja',
     
 ]
 
@@ -82,12 +83,8 @@ WSGI_APPLICATION = 'fashionnova_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'fashionnova_db',
-        'USER': 'root',
-        'PASSWORD': '19099Kim',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
