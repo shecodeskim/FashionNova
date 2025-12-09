@@ -59,7 +59,7 @@ def lipa_na_mpesa_online(phone_number, amount, account_reference, transaction_de
         "PartyA": phone_number,
         "PartyB": shortcode,
         "PhoneNumber": phone_number,
-        "CallBackURL": "https://yourdomain.com/mpesa-callback/",
+        "CallBackURL": "https://mythopoeic-journey-postcolon.ngrok-free.dev/mpesa_callback/",
         "AccountReference": account_reference,
         "TransactionDesc": transaction_desc
     }

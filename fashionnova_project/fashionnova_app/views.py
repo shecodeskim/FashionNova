@@ -222,10 +222,20 @@ def checkout(request):
             
             # Clear cart
             cart_items.delete()
+            if form.cleaned_data['payment_method'] == 'mpesa':
+                return process_mpesa_payment(request, order.id)
+            else:
+                # Clear cart
+                cart_items.delete()
+                messages.success(request, "Order placed successfully!")
+                return redirect('order_detail', order_id=order.id)
+    else:
+        form = CheckoutForm(initial={'payment_method': 'mpesa'})
+    
             
             # Process payment
-            if form.cleaned_data['payment_method'] == 'mpesa':
-                return redirect('process_mpesa_payment', order_id=order.id)
+        '''if form.cleaned_data['payment_method'] == 'mpesa':
+             return redirect('process_mpesa_payment', order_id=order.id)
             else:
                 messages.success(request, 'Order placed successfully!')
                 return redirect('order_detail', order_id=order.id)
@@ -234,7 +244,7 @@ def checkout(request):
             'phone': request.user.phone if request.user.phone else '',
             'shipping_address': request.user.address if request.user.address else '',
         }
-        form = CheckoutForm(initial=initial_data)
+        form = CheckoutForm(initial=initial_data)'''
     
     context = {
         'form': form,
@@ -367,98 +377,20 @@ def add_product(request):
                     name='General',
                     defaults={'is_active': True}
                 )
+        
         seller = SellerProfile.objects.get(user=request.user.id)
 
         product = Product(name=name, seller=seller, description=description, price=price, discount_price=discount_price, category=category, brand=brand, gender=gender, image=image, stock=stock )
         product.save()
-        '''form = ProductForm(request.POST)
-        print(request.POST)
-        if form.is_valid():
-            print("=====")
-            form.save()
-            messages.success(request, 'product added successfully')
-            return redirect('products')
-        else:
-            print("*****")
-           
-            messages.error(request, 'product did not add successfully')'''
-    else:
-        #form = ProductForm()
-        print('========')
-    return render (request, 'add_product.html')
-    '''if request.method == 'POST':
-        try:
-            # Get form data
-            name = request.POST.get('name')
-            description = request.POST.get('description')
-            price = request.POST.get('price')
-            stock = request.POST.get('stock', 0)
-            
-            # Handle category
-            category_id = request.POST.get('category')
-            category = None
-            if category_id and category_id.isdigit():
-                try:
-                    category = Category.objects.get(id=int(category_id))
-                except Category.DoesNotExist:
-                    pass
-            
-            # If no category selected, create a default one
-            if not category:
-                category, created = Category.objects.get_or_create(
-                    name='General',
-                    defaults={'is_active': True}
-                )
-            
-            # Handle brand
-            brand_id = request.POST.get('brand')
-            brand = None
-            if brand_id and brand_id.isdigit():
-                try:
-                    brand = Brand.objects.get(id=int(brand_id))
-                except Brand.DoesNotExist:
-                    pass
-            
-            # Create product
-            product = Product.objects.create(
-                seller=request.user,
-                name=name,
-                description=description,
-                category=category,
-                brand=brand,
-                price=price,
-                discount_price=request.POST.get('discount_price') or None,
-                stock=stock,
-                gender=request.POST.get('gender', 'U'),
-                is_active=request.POST.get('is_active') == 'on',
-                is_featured=request.POST.get('is_featured') == 'on',
-                is_new=request.POST.get('is_new') == 'on',
-                low_stock_threshold=request.POST.get('low_stock_threshold', 10),
-            )
-            
-            # Handle image upload
-            if 'main_image' in request.FILES:
-                product.image = request.FILES['main_image']
-                product.save()
-            
-            messages.success(request, f'Product "{name}" has been published successfully!')
-            
-            # Redirect to products page where the new product will be visible
-            return redirect('products')
-            
-        except Exception as e:
-            messages.error(request, f'Error creating product: {str(e)}')
-            return redirect('add_product')
-    
-    # GET request - show form
-    # Get existing categories and brands for dropdowns
-    categories = Category.objects.filter(is_active=True).order_by('name')
-    brands = Brand.objects.filter(is_active=True).order_by('name')
+        return redirect('products')
+    categories = Category.objects.all()
+    brands = Brand.objects.all()
     
     return render(request, 'add_product.html', {
         'categories': categories,
-        'brands': brands,
-    })'''
+        'brands': brands
+    })
+    #return redirect('products')
 
 def products_view(request):
     """View to display all products - shows published products"""
@@ -645,6 +577,8 @@ def process_mpesa_payment(request, order_id):
     consumer_secret = settings.MPESA_CONSUMER_SECRET
     shortcode = settings.MPESA_SHORTCODE
     passkey = settings.MPESA_PASSKEY
+
+    from .mpesa_utils import lipa_na_mpesa_online
     
     # Generate access token
     api_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
@@ -678,7 +612,7 @@ def process_mpesa_payment(request, order_id):
             "PartyA": order.phone,
             "PartyB": shortcode,
             "PhoneNumber": order.phone,
-            "CallBackURL": "https://yourdomain.com/mpesa-callback/",
+            "CallBackURL": "https://mythopoeic-journey-postcolon.ngrok-free.dev/mpesa_callback/",
             "AccountReference": order.order_number,
             "TransactionDesc": f"Payment for order {order.order_number}"
         }
@@ -747,6 +681,7 @@ def mpesa_callback(request):
     
     from django.db.models import Count, Sum, Avg, Q
 from datetime import datetime, timedelta
+
 
 @login_required
 def wishlist_view(request):

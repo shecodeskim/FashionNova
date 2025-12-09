@@ -158,8 +158,7 @@ class Order(models.Model):
     
     PAYMENT_CHOICES = (
         ('mpesa', 'M-Pesa'),
-        ('card', 'Credit Card'),
-        ('cod', 'Cash on Delivery'),
+        
     )
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')

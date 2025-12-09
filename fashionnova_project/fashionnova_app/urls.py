@@ -50,7 +50,8 @@ urlpatterns = [
     path('products/', views.products_view, name='products'),
 
     # M-Pesa URLs
-    path('process-mpesa/<int:order_id>/', views.process_mpesa_payment, name='process_mpesa_payment'),
+    #path('dajaja/stk_push', views.stk_push_callback, name='stk_push_callback'),
+   path('process-mpesa/<int:order_id>/', views.process_mpesa_payment, name='process_mpesa_payment'),
     path('mpesa-callback/', views.mpesa_callback, name='mpesa_callback'),
 
     # Authentication URLs
