@@ -24,7 +24,7 @@ class CheckoutForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Enter your full address'}),
         required=True
     )
-    phone = forms.CharField(max_length=15, required=True)
+    phone = forms.CharField(max_length=20, required=True, widget=forms.TextInput(attrs={'placeholder': 'eg 25470000000'}))
     payment_method = forms.ChoiceField(
         choices=Order.PAYMENT_CHOICES,
         widget=forms.RadioSelect

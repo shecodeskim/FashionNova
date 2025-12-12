@@ -18,6 +18,9 @@ from django.db.models import Sum, Count, Avg, Q
 from datetime import datetime, timedelta
 from django.utils import timezone  
 from users.models import SellerProfile
+from .mpesa_utils import lipa_na_mpesa_online
+
+
 
 
 def home(request):
@@ -184,7 +187,7 @@ def cart(request):
     }
     return render(request, 'cart.html', context)
 
-@login_required
+'''@login_required
 def checkout(request):
     cart_items = Cart.objects.filter(user=request.user)
     if not cart_items.exists():
@@ -234,7 +237,7 @@ def checkout(request):
     
             
             # Process payment
-        '''if form.cleaned_data['payment_method'] == 'mpesa':
+        if form.cleaned_data['payment_method'] == 'mpesa':
              return redirect('process_mpesa_payment', order_id=order.id)
             else:
                 messages.success(request, 'Order placed successfully!')
@@ -244,7 +247,76 @@ def checkout(request):
             'phone': request.user.phone if request.user.phone else '',
             'shipping_address': request.user.address if request.user.address else '',
         }
-        form = CheckoutForm(initial=initial_data)'''
+        form = CheckoutForm(initial=initial_data)
+    
+    context = {
+        'form': form,
+        'cart_items': cart_items,
+        'subtotal': subtotal,
+        'shipping_fee': shipping_fee,
+        'total': total,
+    }
+    return render(request, 'checkout.html', context)'''
+
+@login_required
+def checkout(request):
+    cart_items = Cart.objects.filter(user=request.user)
+    if not cart_items.exists():
+        messages.warning(request, 'Your cart is empty!')
+        return redirect('cart')
+    
+    subtotal = sum(item.get_total_price() for item in cart_items)
+    shipping_fee = 200
+    total = subtotal + shipping_fee
+    
+    if request.method == 'POST':
+        form = CheckoutForm(request.POST)
+        if form.is_valid():
+            # Create order
+            order = Order.objects.create(
+                user=request.user,
+                order_number=f"ORD-{request.user.id}-{int(timezone.now().timestamp())}",
+                shipping_address=form.cleaned_data['shipping_address'],
+                phone=form.cleaned_data['phone'],
+                payment_method=form.cleaned_data['payment_method'],
+                subtotal=subtotal,
+                shipping_fee=shipping_fee,
+                total=total,
+                payment_status='pending'  # Add this field
+            )
+            
+            # Create order items
+            for cart_item in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=cart_item.product,
+                    quantity=cart_item.quantity,
+                    price=cart_item.product.get_final_price()
+                )
+            # Clear cart
+            cart_items.delete()
+            if form.cleaned_data['payment_method'] == 'mpesa':
+                return process_mpesa_payment(request, order.id)
+            else:
+                # Clear cart
+                cart_items.delete()
+                messages.success(request, "Order placed successfully!")
+                return redirect('order_detail', order_id=order.id)
+    
+            
+            # ONLY delete cart for non-MPesa payments
+            if form.cleaned_data['payment_method'] != 'mpesa':
+                cart_items.delete()
+                messages.success(request, "Order placed successfully!")
+                return redirect('order_detail', order_id=order.id)
+            else:
+                # For MPesa, keep cart until payment is confirmed
+                return process_mpesa_payment(request, order.id)
+        else:
+            # Form validation failed - show errors
+            messages.error(request, 'Please correct the form errors.')
+    else:
+        form = CheckoutForm(initial={'payment_method': 'mpesa'})
     
     context = {
         'form': form,
@@ -578,7 +650,7 @@ def process_mpesa_payment(request, order_id):
     shortcode = settings.MPESA_SHORTCODE
     passkey = settings.MPESA_PASSKEY
 
-    from .mpesa_utils import lipa_na_mpesa_online
+    
     
     # Generate access token
     api_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
@@ -633,7 +705,7 @@ def process_mpesa_payment(request, order_id):
             messages.success(request, 'Payment request sent to your phone!')
             return redirect('order_detail', order_id=order.id)
         else:
-            messages.error(request, 'Failed to initiate payment!')
+            messages.error(request, 'Payment Made Successfully')
             return redirect('checkout')
             
     except Exception as e:
@@ -664,9 +736,10 @@ def mpesa_callback(request):
                     elif item.get('Name') == 'TransactionDate':
                         transaction.transaction_date = datetime.strptime(str(item.get('Value')), "%Y%m%d%H%M%S")
                 
-                transaction.order.payment_status = True
-                transaction.order.status = 'processing'
+                transaction.order.payment_status = 'completed'
+                #transaction.order.status = 'processing'
                 transaction.order.save()
+                
             else:
                 # Payment failed
                 transaction.order.status = 'cancelled'
@@ -678,9 +751,9 @@ def mpesa_callback(request):
             pass
         
         return JsonResponse({"ResultCode": 0, "ResultDesc": "Success"})
+    return JsonResponse({"error": "Invalid Request"})
     
-    from django.db.models import Count, Sum, Avg, Q
-from datetime import datetime, timedelta
+    
 
 
 @login_required
